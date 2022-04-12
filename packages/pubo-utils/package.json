@@ -1,0 +1,21 @@
+{
+  "name": "pubo-utils",
+  "version": "1.0.1",
+  "main": "./lib/index.js",
+  "module": "./es/index.js",
+  "types": "./lib/index.d.ts",
+  "unpkg": "dist/index.js",
+  "sideEffects": false,
+  "scripts": {
+    "build": "gulp && webpack-cli"
+  },
+  "files": [
+    "dist",
+    "lib",
+    "es",
+    "package.json"
+  ],
+  "engines": {
+    "node": ">=8.0.0"
+  }
+}
