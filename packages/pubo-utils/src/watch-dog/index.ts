@@ -1,28 +1,37 @@
-export default class WatchDog {
+export class WatchDog {
   count = 0;
   limit = 1;
+  i: any = null;
 
-  constructor({ limit = 1, onError }) {
+  constructor({ limit = 1, onTimeout }: { limit: number; onTimeout: () => void }) {
     this.limit = limit;
-    this.onError = onError;
+    this.onTimeout = onTimeout;
+  }
+
+  onTimeout() {
+    console.log('timeout!');
   }
 
   init() {
-    setInterval(() => this.onTimer(), 1000);
+    this.i = setInterval(() => this.onTimer(), 1000);
   }
 
   feed() {
     this.count = 0;
   }
 
-  onError() {}
-
   onTimer() {
-    if (this.count > this.limit && typeof this.onError === 'function') {
-      this.onError();
+    if (this.count > this.limit && typeof this.onTimeout === 'function') {
+      this.onTimeout();
       this.count = 0;
     } else {
       this.count++;
+    }
+  }
+
+  stop() {
+    if (this.i) {
+      clearInterval(this.i);
     }
   }
 }
