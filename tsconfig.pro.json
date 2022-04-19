@@ -9,6 +9,8 @@
     "**/__test__",
     "**/demo",
     "example",
-    "gulpfile.js"
+    "gulpfile.js",
+    "express",
+    "express-ws"
   ]
 }

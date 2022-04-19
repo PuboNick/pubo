@@ -1,5 +1,5 @@
 {
-  "name": "pubo-utils",
+  "name": "pubo",
   "private": true,
   "scripts": {
     "init": "rm -rf node_modules && yarn install && yarn run clean && yarn run bootstrap && yarn run build",
@@ -67,5 +67,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "author": "Jiang Jinming <360104322@qq.com>"
+  "author": "Jiang Jinming <360104322@qq.com>",
+  "repository": "git@github.com:PuboNick/pubo.git"
 }
