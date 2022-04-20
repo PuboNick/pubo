@@ -1,8 +1,6 @@
-import * as expressWs from 'express-ws';
-
 import { RTSP2Mpeg } from './rtsp2mpeg';
 
-export const initRtspVideos = ({ app, server, videos, path }) => {
+export const initRtspVideos = ({ app, server, videos, path, expressWs }) => {
   const mpegList = videos.map((url) => new RTSP2Mpeg(url));
   expressWs(app, server);
 

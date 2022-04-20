@@ -20,8 +20,6 @@
   },
   "dependencies": {
     "@types/node": "^17.0.25",
-    "express": "^4.17.3",
-    "express-ws": "^5.0.2",
     "pubo-utils": "^1.0.5-alpha.0"
   }
 }
