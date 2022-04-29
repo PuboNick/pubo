@@ -1,7 +1,7 @@
 export function throttle(cb, time) {
   let t;
   let onOff = true;
-  return () => {
+  return (...args) => {
     if (!t) {
       t = setTimeout(() => {
         onOff = true;
@@ -11,7 +11,7 @@ export function throttle(cb, time) {
 
     if (onOff) {
       onOff = false;
-      cb();
+      cb(...args);
     }
   };
 }
