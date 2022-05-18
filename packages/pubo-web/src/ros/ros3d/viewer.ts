@@ -1,5 +1,5 @@
 import ROSLIB from 'roslib';
-import { RosConfigure } from '../factory/configure';
+import type { RosConfigure } from '../factory/configure';
 
 import { InjectUtil } from './inject';
 import { basePointCloudOptions, loadLib } from './utils';

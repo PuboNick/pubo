@@ -2,7 +2,7 @@ import { random } from '../random';
 
 interface EmitterType {
   on: (event: string, func: any) => string;
-  cancel: (id: string) => void;
+  cancel: (id?: string) => void;
   emit: (event: string, ...args: any) => any;
 }
 
@@ -23,7 +23,11 @@ export class Emitter implements EmitterType {
     return key;
   }
 
-  cancel(id: string) {
+  cancel(id?: string) {
+    if (!id) {
+      this.clear();
+      return;
+    }
     const { event, index } = this.ids[id] || {};
     if (!event) {
       return;
@@ -32,6 +36,10 @@ export class Emitter implements EmitterType {
       return;
     }
     this.state[event].splice(index, 1);
+  }
+
+  clear() {
+    this.state.length = 0;
   }
 
   async emit(event: string, ...args: any) {
