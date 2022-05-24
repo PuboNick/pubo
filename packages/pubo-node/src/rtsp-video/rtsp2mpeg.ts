@@ -6,9 +6,17 @@ export class RTSP2Mpeg {
   private readonly dog = new WatchDog({ limit: 10, onTimeout: () => this.connect() });
   private readonly url: string;
   private s: any;
+  private readonly options: any;
 
-  constructor(url: string) {
+  constructor(url: string, options: any) {
     this.url = url;
+    this.options = { ...options };
+    if (!this.options.input) {
+      this.options.input = ['-rtsp_transport', 'tcp', '-i'];
+    }
+    if (!this.options.output) {
+      this.options.output = ['-f', 'mpegts', '-codec:v', 'mpeg1video'];
+    }
     this.connect();
     this.dog.init();
   }
@@ -28,7 +36,7 @@ export class RTSP2Mpeg {
 
   private connect() {
     this.closeOld();
-    const options = ['-rtsp_transport', 'tcp', '-i', this.url, '-f', 'mpegts', '-codec:v', 'mpeg1video', '-'];
+    const options = [...this.options.input, this.url, ...this.options.output, '-'];
     this.s = spawn('ffmpeg', options, { detached: false });
 
     this.s.stderr.on('data', (buffer) => this.onMessage(buffer));
