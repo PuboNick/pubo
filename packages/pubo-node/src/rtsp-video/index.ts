@@ -1,6 +1,20 @@
 import { RTSP2Mpeg } from './rtsp2mpeg';
 
-export const initRtspVideos = ({ app, server, videos, path, expressWs }) => {
+interface VideoConfig {
+  url: string;
+  input?: string[];
+  output?: string[];
+}
+
+interface Props {
+  app: any;
+  server?: any;
+  videos: VideoConfig[];
+  path: string;
+  expressWs: any;
+}
+
+export const initRtspVideos = ({ app, server, videos, path, expressWs }: Props) => {
   const mpegList = videos.map(({ url, ...options }) => new RTSP2Mpeg(url, options));
   expressWs(app, server);
 
