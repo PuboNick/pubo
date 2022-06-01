@@ -4,6 +4,7 @@ interface EmitterType {
   on: (event: string, func: any) => string;
   cancel: (id?: string) => void;
   emit: (event: string, ...args: any) => any;
+  clear: () => void;
 }
 
 export class Emitter implements EmitterType {
