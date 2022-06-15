@@ -1,4 +1,4 @@
-export const debounce = (cb: any, time: number, first = true) => {
+export const debounce = (cb: any, time: number, first) => {
   if (first) {
     let shouldRun = true;
     let t;
