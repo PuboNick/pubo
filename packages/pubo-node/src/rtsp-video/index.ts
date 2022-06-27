@@ -16,7 +16,9 @@ interface Props {
 
 export const initRtspVideos = ({ app, server, videos, path, expressWs }: Props) => {
   const mpegList = videos.map(({ url, ...options }) => new RTSP2Mpeg(url, options));
-  expressWs(app, server);
+  if (!app.ws) {
+    expressWs(app, server);
+  }
 
   app.ws(path, (ws, req) => {
     const { channel = 0 } = req.query;
