@@ -11,7 +11,7 @@ interface Props {
   server?: any;
   videos: VideoConfig[];
   path: string;
-  expressWs: any;
+  expressWs?: any;
 }
 
 export const initRtspVideos = ({ app, server, videos, path, expressWs }: Props) => {
