@@ -10,7 +10,8 @@ import { throttle } from './throttle';
 import { ContinuousTrigger } from './trigger';
 import { WatchDog } from './watch-dog';
 import * as Base64Utils from './base64';
-import { HistoryStack } from './statck';
+import { HistoryStack } from './stack';
+import { Cache } from './cache';
 
 export {
   random,
@@ -26,4 +27,5 @@ export {
   debounce,
   Base64Utils,
   HistoryStack,
+  Cache,
 };
