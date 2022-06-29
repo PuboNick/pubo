@@ -47,7 +47,7 @@ export default class WebsocketClient {
     }
   }
 
-  send(data: any, isJson: boolean) {
+  send(data: any, isJson?: boolean) {
     let res = data;
     if (isJson) {
       res = JSON.stringify(data);
