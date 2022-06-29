@@ -46,4 +46,12 @@ export default class WebsocketClient {
       this._status = 2;
     }
   }
+
+  send(data: any) {
+    let res = data;
+    if (typeof data === 'object') {
+      res = JSON.stringify(data);
+    }
+    this.client?.send(res);
+  }
 }
