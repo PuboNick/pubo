@@ -6,7 +6,7 @@ type ProductsObject<T, F> = {
   [key in keyof T]: F;
 };
 
-type Factory<C> = (config: C) => any;
+type Factory<C> = (config: C, key: string) => any;
 
 export type CreateFactory<C, F> = <T>(apis: OptionsObject<T, C>) => ProductsObject<T, F>;
 
@@ -16,7 +16,7 @@ export const superFactory: SuperFactory = (factory) => {
   return (options: any) => {
     const product: any = {};
     for (const key of Object.keys(options)) {
-      product[key] = factory(options[key]);
+      product[key] = factory(options[key], key);
     }
     return product;
   };
