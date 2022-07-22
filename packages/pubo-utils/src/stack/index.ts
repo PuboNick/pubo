@@ -1,7 +1,7 @@
 export class HistoryStack<T> {
   private readonly stack: T[] = [];
   private readonly len: number = 10;
-  private point = -1;
+  private point = 0;
 
   constructor(len = 10) {
     this.len = len;
@@ -14,10 +14,15 @@ export class HistoryStack<T> {
     return undefined;
   }
 
-  push(item: T) {
-    if (this.point > -1) {
+  clear() {
+    this.stack.length = 0;
+    this.point = 0;
+  }
+
+  backup(item: T) {
+    if (this.point > -1 && this.stack.length > 0) {
       this.stack.splice(0, this.point + 1);
-      this.point = -1;
+      this.point = 0;
     }
     this.stack.unshift(item);
     if (this.stack.length > this.len) {
@@ -25,14 +30,14 @@ export class HistoryStack<T> {
     }
   }
 
-  back(): T | undefined {
+  undo(): T | undefined {
     if (this.point < this.stack.length - 1) {
       this.point += 1;
     }
     return this.current;
   }
 
-  forward(): T | undefined {
+  redo(): T | undefined {
     if (this.point > 0) {
       this.point -= 1;
     }
