@@ -21,7 +21,7 @@ export class HistoryStack<T> {
 
   backup(item: T) {
     if (this.point > 0 && this.stack.length > 0) {
-      this.stack.splice(0, this.point + 2);
+      this.stack.splice(0, this.point + 1);
       this.point = 0;
     }
     this.stack.unshift(item);
