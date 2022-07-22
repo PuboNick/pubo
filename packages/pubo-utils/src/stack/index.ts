@@ -31,7 +31,7 @@ export class HistoryStack<T> {
   }
 
   undo(): T | undefined {
-    if (this.point < this.stack.length - 1) {
+    if (this.point < this.stack.length - 2) {
       this.point += 1;
     }
     return this.current;
