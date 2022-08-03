@@ -25,7 +25,7 @@ export class WebStorage {
 
   get state() {
     let value = this.storage.getItem(this._key);
-    if (this.zip) {
+    if (this.zip && value) {
       value = this.zip.inflate(value);
     }
     if (value) {
