@@ -2,7 +2,7 @@ import { debounce } from './debounce';
 import { hex2rgb } from './color/utils';
 import { Emitter } from './emitter';
 import { superFactory } from './factory';
-import { loop } from './loop';
+import { loop, waitFor } from './loop';
 import { SyncQueue } from './queue';
 import { random } from './random';
 import { sleep } from './sleep';
@@ -28,4 +28,5 @@ export {
   Base64Utils,
   HistoryStack,
   Cache,
+  waitFor,
 };
