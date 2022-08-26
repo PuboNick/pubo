@@ -1,32 +1,14 @@
-import { debounce } from './debounce';
-import { hex2rgb } from './color/utils';
-import { Emitter } from './emitter';
-import { superFactory } from './factory';
-import { loop, waitFor } from './loop';
-import { SyncQueue } from './queue';
-import { random } from './random';
-import { sleep } from './sleep';
-import { throttle } from './throttle';
-import { ContinuousTrigger } from './trigger';
-import { WatchDog } from './watch-dog';
-import * as Base64Utils from './base64';
-import { HistoryStack } from './stack';
-import { Cache } from './cache';
-
-export {
-  random,
-  WatchDog,
-  superFactory,
-  Emitter,
-  SyncQueue,
-  sleep,
-  ContinuousTrigger,
-  throttle,
-  loop,
-  hex2rgb,
-  debounce,
-  Base64Utils,
-  HistoryStack,
-  Cache,
-  waitFor,
-};
+export { debounce } from './debounce';
+export { hex2rgb } from './color/utils';
+export { Emitter } from './emitter';
+export { superFactory } from './factory';
+export { loop, waitFor } from './loop';
+export { SyncQueue } from './queue';
+export { random } from './random';
+export { sleep } from './sleep';
+export { throttle } from './throttle';
+export { ContinuousTrigger } from './trigger';
+export { WatchDog } from './watch-dog';
+export * as Base64Utils from './base64';
+export { HistoryStack } from './stack';
+export { Cache } from './cache';

@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@types/node": "^17.0.25",
+    "pako": "^2.0.4",
     "pubo-utils": "^1.0.31"
   }
 }

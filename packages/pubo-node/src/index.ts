@@ -1,5 +1,4 @@
-import { FtpClient } from './ftp-client';
-import { md5 } from './md5';
-import { initRtspVideos } from './rtsp-video';
-
-export { initRtspVideos, md5, FtpClient };
+export { JsonStorage } from './storage/json';
+export { initRtspVideos } from './rtsp-video';
+export { FtpClient } from './ftp-client';
+export { md5 } from './md5';
