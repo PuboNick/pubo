@@ -1,6 +1,6 @@
 {
   "name": "pubo-node",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "main": "./lib/index.js",
   "module": "./es/index.js",
   "types": "./lib/index.d.ts",
@@ -21,6 +21,6 @@
   "dependencies": {
     "@types/node": "^17.0.25",
     "pako": "^2.0.4",
-    "pubo-utils": "^1.0.31"
+    "pubo-utils": "^1.0.32"
   }
 }
