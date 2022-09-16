@@ -1,4 +1,4 @@
-export function throttle(cb, time) {
+export function throttle(cb, time: number) {
   let t;
   let onOff = true;
   return (...args) => {

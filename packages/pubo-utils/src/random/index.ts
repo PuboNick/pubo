@@ -9,7 +9,7 @@ export const random = (n = 8) => {
   }
 
   let res = '';
-  for (let a = 8; a <= n; a += 8) {
+  for (let a = 0; a <= n; a += 8) {
     if (n - a > 8) {
       res += ra(8);
     } else {

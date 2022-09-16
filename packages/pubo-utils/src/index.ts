@@ -8,7 +8,5 @@ export { random } from './random';
 export { sleep } from './sleep';
 export { throttle } from './throttle';
 export { ContinuousTrigger } from './trigger';
-export { WatchDog } from './watch-dog';
 export * as Base64Utils from './base64';
 export { HistoryStack } from './stack';
-export { Cache } from './cache';

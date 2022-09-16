@@ -20,14 +20,23 @@ export const loop = (cb: (stop: () => void) => Promise<void>, time: number) => {
   return stop;
 };
 
-export const waitFor = (cb: () => boolean, time?: number) => {
-  return new Promise((resolve) => {
-    loop(async (stop) => {
-      const res = await cb();
+type WaitForBool = () => boolean | Promise<boolean>;
+
+export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?: number; timeout?: number } = {}) => {
+  return new Promise((resolve, reject) => {
+    const stop = loop(async () => {
+      const res = await bool();
       if (res) {
         stop();
         resolve(res);
       }
-    }, time || 100);
+    }, checkTime || 100);
+
+    if (timeout) {
+      setTimeout(() => {
+        stop();
+        reject('timeout');
+      }, timeout);
+    }
   });
 };

@@ -13,9 +13,7 @@ export default class WebsocketClient {
 
   private reconnect() {
     if (this._status === 3) {
-      setTimeout(() => {
-        this.connect();
-      }, 1000);
+      setTimeout(() => this.connect(), 1000);
     }
   }
 
@@ -47,7 +45,7 @@ export default class WebsocketClient {
     }
   }
 
-  send(data: any, isJson?: boolean) {
+  send(data: any, isJson = false) {
     let res = data;
     if (isJson) {
       res = JSON.stringify(data);
