@@ -10,3 +10,4 @@ export { throttle } from './throttle';
 export { ContinuousTrigger } from './trigger';
 export * as Base64Utils from './base64';
 export { HistoryStack } from './stack';
+export { WatchDog } from './watch-dog';
