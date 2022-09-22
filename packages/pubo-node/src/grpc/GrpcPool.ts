@@ -8,15 +8,15 @@ export class GrpcPool {
   private static instance: GrpcPool | null = null;
 
   public static getPool = (): GrpcPool => {
-    if (!this.instance) {
-      this.instance = new GrpcPool(this.pool);
+    if (!GrpcPool.instance) {
+      GrpcPool.instance = new GrpcPool(GrpcPool.pool);
     }
-    return this.instance;
+    return GrpcPool.instance;
   };
 
   public static setPool = (pool: GrpcPoolType) => {
-    this.pool = pool;
-    this.instance = new GrpcPool(this.pool);
+    GrpcPool.pool = pool;
+    GrpcPool.instance = new GrpcPool(GrpcPool.pool);
   };
 
   private readonly list: { id: string; grpc: Grpc }[] = [];
