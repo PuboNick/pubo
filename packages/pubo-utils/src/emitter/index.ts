@@ -43,11 +43,11 @@ export class Emitter implements EmitterType {
     this.state.length = 0;
   }
 
-  async emit(event: string, ...args: any) {
+  emit(event: string, ...args: any) {
     if (Array.isArray(this.state[event])) {
       for (const func of this.state[event]) {
         if (typeof func === 'function') {
-          await func(...args);
+          func(...args);
         }
       }
     }
