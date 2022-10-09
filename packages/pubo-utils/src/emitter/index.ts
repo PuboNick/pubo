@@ -37,6 +37,7 @@ export class Emitter implements EmitterType {
       return;
     }
     this.state[event].splice(index, 1);
+    delete this.ids[id];
   }
 
   clear() {
