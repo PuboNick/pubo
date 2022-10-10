@@ -38,6 +38,11 @@ export class Emitter implements EmitterType {
     }
     this.state[event].splice(index, 1);
     delete this.ids[id];
+    Object.keys(this.ids).forEach((key) => {
+      if (this.ids[key].event === event && this.ids[key].index > index) {
+        this.ids[key].index = this.ids[key].index - 1;
+      }
+    });
   }
 
   clear() {
