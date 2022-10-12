@@ -1,12 +1,12 @@
 import { Emitter } from 'pubo-utils';
 
 export default class WebsocketClient {
-  private client: WebSocket | null;
+  private client: WebSocket | null = null;
   private _status = 0;
-  private readonly url = '';
+  private readonly url: string;
   emitter = new Emitter();
 
-  constructor({ url }) {
+  constructor({ url }: { url: string }) {
     this.url = url;
     this.connect();
   }
@@ -24,11 +24,14 @@ export default class WebsocketClient {
     this.reconnect();
   }
 
-  private onMessage(e) {
+  private onMessage(e: any) {
     this.emitter.emit('message', e.data);
   }
 
   connect() {
+    if (this.client) {
+      return;
+    }
     this.client = new WebSocket(this.url);
     this.client.onclose = this.onClose.bind(this);
     this.client.onmessage = this.onMessage.bind(this);
