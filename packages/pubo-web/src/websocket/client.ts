@@ -12,6 +12,7 @@ export default class WebsocketClient {
   }
 
   private reconnect() {
+    this.close();
     if (this._status === 3) {
       setTimeout(() => this.connect(), 1000);
     }
