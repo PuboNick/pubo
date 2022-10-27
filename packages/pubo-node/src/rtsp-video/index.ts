@@ -99,7 +99,7 @@ export const initRtspVideos = ({ app, server, videos, path, expressWs }: Props) 
       });
     }
     ws.on('close', () => {
-      if (listener) {
+      if (listener && manager.list[channel]) {
         manager.list[channel].cancel(listener);
       }
     });
