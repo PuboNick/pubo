@@ -50,4 +50,13 @@ export class RTSP2Mpeg {
   public cancel(id) {
     this.eventEmitter.cancel(id);
   }
+
+  public destroy() {
+    this.eventEmitter.clear();
+    this.dog.stop();
+    if (this.s) {
+      this.s.kill();
+      this.s = null;
+    }
+  }
 }
