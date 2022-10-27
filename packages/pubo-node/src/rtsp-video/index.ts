@@ -47,7 +47,7 @@ export class RtspVideosManager {
   private readonly storage = new VideoStorage();
 
   constructor(videos: VideoConfig[]) {
-    this._system = videos;
+    this._system = videos.map((item) => ({ ...item, system: true }));
     this._customer = this.storage.data || [];
     this.system = videos.map(({ url, ...options }) => new RTSP2Mpeg(url, options));
     this.customer = this._customer.map(({ url, ...options }) => new RTSP2Mpeg(url, options));
