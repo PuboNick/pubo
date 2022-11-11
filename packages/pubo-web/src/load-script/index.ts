@@ -11,15 +11,24 @@ export const loadScript = (url: string, options: any = {}) => {
 
   return new Promise((resolve) => {
     const old = findScript();
-    if (old) {
+    let el: any = old;
+
+    if (!old) {
+      el = document.createElement('script');
+    } else if (old._state === 'complete') {
       return resolve(url);
     }
-    const el: any = document.createElement('script');
+
     for (const key of Object.keys(options)) {
       el[key] = options[key];
     }
+    const onLoad = () => {
+      resolve(url);
+      el.removeEventListener('load', onLoad);
+      el._state = 'complete';
+    };
     el.src = url;
-    el.onload = () => resolve(url);
+    el.addEventListener('load', onLoad);
     document.body.appendChild(el);
     return 'success';
   });
