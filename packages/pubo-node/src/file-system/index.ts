@@ -4,21 +4,20 @@ import * as fs from 'fs';
 interface PuboFileSystemInterface {
   read: <TBuffer extends NodeJS.ArrayBufferView>(
     fd: number,
-    buffer: TBuffer,
-    offset: number,
-    length: number,
-    position: fs.ReadPosition | null,
+    buffer?: TBuffer,
+    offset?: number,
+    length?: number,
+    position?: fs.ReadPosition | null,
   ) => Promise<[number, TBuffer]>;
 
   readFile: (
     path: fs.PathOrFileDescriptor,
-    options:
+    options?:
       | ({
           encoding?: null;
           flag?: string;
         } & EventEmitter.Abortable)
-      | null
-      | undefined,
+      | null,
   ) => Promise<Buffer>;
 
   writeFile: (
@@ -38,7 +37,7 @@ interface PuboFileSystemInterface {
       | null,
   ) => Promise<string[]>;
 
-  open: (path: fs.PathLike, flags: fs.OpenMode, mode: fs.Mode | null | undefined) => Promise<number>;
+  open: (path: fs.PathLike, flags?: fs.OpenMode, mode?: fs.Mode | null) => Promise<number>;
 
   close: (fd: number) => Promise<void>;
 
