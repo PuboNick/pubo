@@ -11,3 +11,6 @@ export { ContinuousTrigger } from './trigger';
 export * as Base64Utils from './base64';
 export { HistoryStack } from './stack';
 export { WatchDog } from './watch-dog';
+export { Level } from './level';
+export * as PuboGeometry from './math/geometry';
+export { callbackToPromise } from './promise';
