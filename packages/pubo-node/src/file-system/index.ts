@@ -58,7 +58,7 @@ const callbackToPromise = (fn): any => {
           reject(err);
         }
         if (rest.length < 2) {
-          resolve(rest);
+          resolve(rest[0]);
         } else {
           resolve([...rest]);
         }

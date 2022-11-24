@@ -1,5 +1,5 @@
 // 回调函数转异步函数
-export const callbackToPromise = (fn): any => {
+const callbackToPromise = (fn): any => {
   return (...args) =>
     new Promise((resolve: any, reject) => {
       fn(...args, (err, ...rest) => {
@@ -7,7 +7,7 @@ export const callbackToPromise = (fn): any => {
           reject(err);
         }
         if (rest.length < 2) {
-          resolve(rest);
+          resolve(rest[0]);
         } else {
           resolve([...rest]);
         }
