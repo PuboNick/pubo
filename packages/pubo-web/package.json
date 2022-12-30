@@ -1,6 +1,6 @@
 {
   "name": "pubo-web",
-  "version": "1.0.51",
+  "version": "1.0.52",
   "main": "./lib/index.js",
   "module": "./es/index.js",
   "types": "./lib/index.d.ts",
@@ -19,7 +19,7 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
-    "pubo-utils": "^1.0.51",
+    "pubo-utils": "^1.0.52",
     "roslib": "^1.2.0"
   }
 }
