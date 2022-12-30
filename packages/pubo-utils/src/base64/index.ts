@@ -39,5 +39,5 @@ export function toUnit8Array(input) {
     }
   }
 
-  return output.slice(0, j);
+  return output;
 }
