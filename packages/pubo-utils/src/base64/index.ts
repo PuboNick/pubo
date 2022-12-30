@@ -13,7 +13,8 @@ export const EncoderMap = (function () {
  * @param output Uint8Array
  * base64 6位的二进制, Uint8Array 8位的二进制，整体原理就是将 base64 的每个字符转成2进制然后拼接，再按每个八位为一个单位地取出
  */
-export function toUnit8Array(input, output) {
+export function toUnit8Array(input) {
+  const output = new Uint8Array((input.length * 6) / 8);
   // 当前二进制字符长度
   let l = 0;
   //  二进制字符缓存值（格式为10进制）
@@ -37,4 +38,6 @@ export function toUnit8Array(input, output) {
       b = b - c;
     }
   }
+
+  return output;
 }
