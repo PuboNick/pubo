@@ -31,14 +31,14 @@ export class HistoryStack<T> {
   }
 
   undo(): T | undefined {
-    if (this.point < this.stack.length - 2) {
+    if (this.point < this.stack.length - 1) {
       this.point += 1;
     }
     return this.current;
   }
 
   redo(): T | undefined {
-    if (this.point > 1) {
+    if (this.point > 0) {
       this.point -= 1;
     }
     return this.current;
