@@ -1,12 +1,9 @@
-export const pickFiles = (): Promise<File[] | null> => {
+export const pickFiles = (): Promise<FileList> => {
   return new Promise((resolve) => {
     const el = document.createElement('input');
-    const destroy = () => {
-      document.body.removeChild(el);
-    };
+
     const onFocus = () => {
-      resolve(null);
-      destroy();
+      document.body.removeChild(el);
       window.removeEventListener('focus', onFocus);
     };
     el.type = 'file';
@@ -15,11 +12,8 @@ export const pickFiles = (): Promise<File[] | null> => {
     el.style.top = '0px';
     el.style.zIndex = '-1';
     window.addEventListener('focus', onFocus);
-
     el.onchange = (e: any) => {
       resolve(e.target.files);
-      window.removeEventListener('focus', onFocus);
-      destroy();
     };
 
     document.body.appendChild(el);
