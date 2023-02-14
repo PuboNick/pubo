@@ -15,11 +15,20 @@ export const radians = (deg: number) => {
 // 获取角度
 export const getAngle = ({ w, h }: { w: number; h: number }) => {
   const a = degrees(Math.asin(h / Math.sqrt(Math.pow(w, 2) + Math.pow(h, 2))));
+  let res;
   if (w <= 0) {
-    return 180 - a;
+    res = 180 - a;
+  } else if (a > 0) {
+    res = a;
+  } else {
+    res = 360 + a;
   }
-  if (a > 0) {
-    return a;
+  if (res < -180) {
+    res = res + 360;
   }
-  return 360 + a;
+  if (res > 180) {
+    res = 180 - 360;
+  }
+
+  return res;
 };
