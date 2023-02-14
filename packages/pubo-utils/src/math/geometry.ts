@@ -27,7 +27,7 @@ export const getAngle = ({ w, h }: { w: number; h: number }) => {
     res = res + 360;
   }
   if (res > 180) {
-    res = 180 - 360;
+    res = res - 360;
   }
 
   return res;
