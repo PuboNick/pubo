@@ -42,5 +42,13 @@ export function filterKeyPoints(list: Point2D[], len = 0.5): Point2D[] {
   if (list.length < 3 || len <= 0) {
     return list;
   }
-  return list.filter((item, i) => i < 1 || getDistance(list[i - 1], item) >= len);
+
+  let last;
+  return list.filter((item, i) => {
+    if (i > 0 && getDistance(last, item) < len) {
+      return false;
+    }
+    last = list[i];
+    return true;
+  });
 }
