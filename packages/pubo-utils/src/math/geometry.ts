@@ -39,7 +39,7 @@ interface Point2D {
 }
 
 export function filterKeyPoints(list: Point2D[], len = 0.5): Point2D[] {
-  if (list.length < 3) {
+  if (list.length < 3 || len <= 0) {
     return list;
   }
   return list.filter((item, i) => i < 1 || getDistance(list[i - 1], item) >= len);

@@ -14,4 +14,4 @@ export { WatchDog } from './watch-dog';
 export { Level } from './level';
 export * as PuboGeometry from './math/geometry';
 export { callbackToPromise } from './promise';
-export { getAngle, getDistance, degrees, radians } from './math/geometry';
+export { getAngle, getDistance, degrees, radians, filterKeyPoints } from './math/geometry';
