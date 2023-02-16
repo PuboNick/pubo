@@ -32,3 +32,15 @@ export const getAngle = ({ w, h }: { w: number; h: number }) => {
 
   return res;
 };
+
+interface Point2D {
+  x: number;
+  y: number;
+}
+
+export function filterKeyPoints(list: Point2D[], len = 0.5): Point2D[] {
+  if (list.length < 3) {
+    return list;
+  }
+  return list.filter((item, i) => i < 1 || getDistance(list[i - 1], item) >= len);
+}
