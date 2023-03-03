@@ -52,3 +52,12 @@ export function filterKeyPoints(list: Point2D[], len = 0.5): Point2D[] {
     return true;
   });
 }
+// 获取中心点坐标
+export function getCenter(list: Point2D[]): Point2D {
+  const tmp: [number, number] = [0, 0];
+  for (const item of list) {
+    tmp[0] += item.x;
+    tmp[1] += item.y;
+  }
+  return { x: tmp[0] / list.length, y: tmp[0] / list.length };
+}
