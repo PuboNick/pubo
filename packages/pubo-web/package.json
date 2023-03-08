@@ -19,7 +19,6 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
-    "pubo-utils": "^1.0.67",
-    "roslib": "^1.2.0"
+    "pubo-utils": "^1.0.67"
   }
 }

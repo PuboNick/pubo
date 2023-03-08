@@ -3,14 +3,9 @@
   "private": true,
   "scripts": {
     "init": "rm -rf node_modules && yarn install && yarn run clean && yarn run bootstrap && yarn run build",
-    "start": "yarn run dev",
-    "dev": "dumi dev",
     "bootstrap": "lerna bootstrap",
     "clean": "lerna clean --yes",
     "build": "lerna run build",
-    "test": "jest",
-    "lint": "eslint --ignore-pattern **/__tests__/* --ignore-pattern **/demo/* \"packages/*/src/**/*.{ts,tsx}\"",
-    "build:doc": "dumi build",
     "pub": "yarn run build && lerna publish",
     "pub:beta": "yarn run build && lerna publish --dist-tag beta"
   },
@@ -45,17 +40,15 @@
     "pretty-quick": "^2.0.1",
     "surge": "^0.21.3",
     "ts-jest": "^26.1.0",
-    "typescript": "^3.3.3",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.10",
-    "webpack-merge": "^4.2.2"
+    "typescript": "^4.9.5",
+    "@babel/preset-env": "^7.20.2",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-merge": "^5.8.0"
   },
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "author": "Jiang Jinming <360104322@qq.com>",
-  "repository": "git@github.com:PuboNick/pubo.git",
-  "dependencies": {
-    "@babel/preset-env": "^7.20.2"
-  }
+  "repository": "git@github.com:PuboNick/pubo.git"
 }
