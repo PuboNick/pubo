@@ -11,7 +11,7 @@ interface DragMethodProps {
 
 export class DragMethod {
   private readonly key?: string = '';
-  private readonly cache = { pageX: 0, pageY: 0 };
+  private readonly cache = { pageX: 0, pageY: 0, dragging: false };
 
   private readonly onMouseMove;
   private readonly onMouseUp;
@@ -45,15 +45,17 @@ export class DragMethod {
   private _onMouseUp() {
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
+    this.cache.dragging = false;
     if (typeof this.onMoveEnd === 'function') {
       this.onMoveEnd();
     }
   }
 
   private _onMouseDown(e: any) {
-    if (typeof this.onMove !== 'function') {
+    if (typeof this.onMove !== 'function' || this.cache.dragging) {
       return;
     }
+    this.cache.dragging = true;
     this.cache.pageX = e.pageX;
     this.cache.pageY = e.pageY;
     window.addEventListener('mousemove', this.onMouseMove);
