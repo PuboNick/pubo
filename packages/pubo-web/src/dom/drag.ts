@@ -42,9 +42,13 @@ export class DragMethod {
     this.cache.pageY = e.pageY;
   }
 
-  private _onMouseUp() {
+  private clearListener() {
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
+  }
+
+  private _onMouseUp() {
+    this.clearListener();
     this.cache.dragging = false;
     if (typeof this.onMoveEnd === 'function') {
       this.onMoveEnd();
@@ -52,9 +56,15 @@ export class DragMethod {
   }
 
   private _onMouseDown(e: any) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    } else {
+      e.returnValue = false;
+    }
     if (typeof this.onMove !== 'function' || this.cache.dragging) {
       return;
     }
+    this.clearListener();
     this.cache.dragging = true;
     this.cache.pageX = e.pageX;
     this.cache.pageY = e.pageY;
