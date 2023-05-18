@@ -50,7 +50,7 @@ waitFor 接收一个回调函数和一个查询间隔时间，当回调函数返
   await sleep(1000);
   loop(async () => { console.log('loop') }, 1000);
   setTimeout(() => { bool = true }, 10000);
-  await waitFor(async () => bool, 1000);
+  await waitFor(async () => bool, { checkTime: 1000, timeout: 30000 });
   console.log('done');
 })()
 ```
