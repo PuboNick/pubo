@@ -1,10 +1,18 @@
-# 包含三个模块，pubo-utils： 通用工具方法与平台无关，基本为纯函数；pubo-web：浏览器端方法；pubo-node：nodejs 端方法。
+### 主要模块：
+pubo-utils： 通用工具方法与平台无关，基本为纯函数；
+
+pubo-web：浏览器端方法；
+
+pubo-node：nodejs 端方法。
 
 ### 如何安装
 
 `$ npm install --save pubo-utils`
+
 `$ npm install --save pubo-web`
+
 `$ npm install --save pubo-node`
+
 ## pubo-utils
 ### SyncQueue
 
@@ -31,8 +39,11 @@ for (let i = 0; i < 10; i++) {
 ### sleep & loop & waitFor
 
 loop 为一个异步的死循环，可以通过返回值 stop 方法或回调函数参数 stop 方法终止循环，它是一个安全的循环方法，会等动作执行完成后再继续执行，所以循环间隔时间不是完全准确的
+
 sleep 是一个异步的等待函数
+
 waitFor 接收一个回调函数和一个查询间隔时间，当回调函数返回值为 true 时等待结束。
+
 ```javascript
 (async () => {
   let bool = false;
@@ -54,7 +65,7 @@ emit.emit('hello', 'hello world');
 ```
 
 ### ContinuousTrigger
-一个触发器，在短时间内连续出发 n 次后执行，一般用于传感器数据监测，防止跳变导致的误触
+一个触发器，在短时间内连续触发 n 次后执行，一般用于传感器数据监测，防止跳变导致的误触
 ```javascript
 const trigger = new ContinuousTrigger({ cb() {console.log('done')}, resetTime: 5000, count: 10 });
 for (let i = 0; i < 20; i += 1) {
@@ -63,7 +74,7 @@ for (let i = 0; i < 20; i += 1) {
 ```
 
 ### WatchDog
-一个简单的看门狗工具，如果再规定时间内没有喂狗则任务程序异常，执行回调函数,可用于数据采集，例如摄像头，如果异常可以执行重连函数
+一个简单的看门狗工具，如果再规定时间内没有喂狗则认为程序异常，执行回调函数,可用于数据采集，例如摄像头，如果异常可以执行重连函数
 ```javascript
 const dog = new WatchDog({ limit: 10 /** 单位为 s*/, onTimeout() { console.log('done') } });
 loop(async () => { dog.feed(); }, 9000);
