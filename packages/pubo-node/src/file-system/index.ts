@@ -10,6 +10,8 @@ interface PuboFileSystemInterface {
     position?: fs.ReadPosition | null,
   ) => Promise<[number, TBuffer]>;
 
+  stat: (path: fs.PathLike) => Promise<fs.Stats>;
+
   readFile: (
     path: fs.PathOrFileDescriptor,
     options?:
@@ -74,4 +76,5 @@ export const PuboFileSystem: PuboFileSystemInterface = {
   open: callbackToPromise(fs.open),
   close: callbackToPromise(fs.close),
   write: callbackToPromise(fs.write),
+  stat: callbackToPromise(fs.stat),
 };
