@@ -4,3 +4,4 @@ export { FtpClient, FtpClientPool, FtpConnectOptions, FtpFile } from './ftp-clie
 export { md5 } from './md5';
 export { createRpcClient } from './grpc';
 export { PuboFileSystem } from './file-system';
+export { createChildProcess } from './child-process';
