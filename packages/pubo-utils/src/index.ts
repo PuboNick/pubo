@@ -4,7 +4,7 @@ export { Emitter } from './emitter';
 export { superFactory } from './factory';
 export { loop, waitFor } from './loop';
 export { SyncQueue } from './queue';
-export { random } from './random';
+export { random, randomRangeNum } from './random';
 export { sleep } from './sleep';
 export { throttle } from './throttle';
 export { ContinuousTrigger } from './trigger';

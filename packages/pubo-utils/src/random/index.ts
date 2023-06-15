@@ -19,3 +19,8 @@ export const random = (n = 8) => {
 
   return res;
 };
+
+export const randomRangeNum = (range) => {
+  const size = Math.abs(range[1] - range[0]);
+  return Math.random() * size + Math.min(...range);
+};
