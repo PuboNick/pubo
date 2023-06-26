@@ -1,6 +1,6 @@
 interface WatchDogProps {
   limit: number;
-  onTimeout: () => void;
+  onTimeout: () => void | Promise<void>;
 }
 
 export class WatchDog {

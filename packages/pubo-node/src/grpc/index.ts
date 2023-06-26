@@ -11,13 +11,15 @@ type RpcImpl = (service: string, method: string, data: Uint8Array) => Promise<Ui
 export function createRpcClient<T>({ url, options = {}, ServiceImp, Grpc, cert }: CreateClientProps): T {
   const opt = { 'grpc.max_send_message_length': -1, 'grpc.max_receive_message_length': -1, ...options };
   const credentials = cert ? Grpc.credentials.createSsl(cert) : Grpc.credentials.createInsecure();
-  const connection = new Grpc.Client(url, credentials, opt);
+  let connection = new Grpc.Client(url, credentials, opt);
 
   const request: RpcImpl = (service, method, data) => {
     const path = `/${service}/${method}`;
     return new Promise((resolve, reject) => {
       const resultCallback: any = (err, res) => {
         if (err) {
+          connection.close();
+          connection = new Grpc.Client(url, credentials, opt);
           reject(err);
         } else {
           resolve(res);
