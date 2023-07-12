@@ -16,3 +16,4 @@ export { callbackToPromise } from './promise';
 export { getAngle, getDistance, getCenter, degrees, radians, filterKeyPoints } from './math/geometry';
 export { RegExpList } from './regexp-list';
 export { concatArray } from './array';
+export { SensorDataFilter } from './filter/sensor';
