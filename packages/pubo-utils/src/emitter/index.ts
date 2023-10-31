@@ -5,11 +5,13 @@ interface EmitterType {
   cancel: (id?: string) => void;
   emit: (event: string, ...args: any) => any;
   clear: () => void;
+  clone: () => any;
+  restore: (snapshot: any) => void;
 }
 
 export class Emitter implements EmitterType {
-  private readonly state: any = {};
-  private readonly ids: any = {};
+  private state: any = {};
+  private ids: any = {};
 
   on(event: string, func: any) {
     if (!this.state[event]) {
@@ -57,5 +59,14 @@ export class Emitter implements EmitterType {
         }
       }
     }
+  }
+
+  clone() {
+    return { state: { ...this.state }, ids: { ...this.ids } };
+  }
+
+  restore(snapshot) {
+    this.state = snapshot.state;
+    this.ids = snapshot.ids;
   }
 }
