@@ -8,7 +8,7 @@ export class RegExpList {
 
   private getRegEXP(item) {
     const str = item.replace('/', '\\/').replace('*', '.*');
-    return new RegExp(str, 'g');
+    return new RegExp(str);
   }
 
   include(value: string) {
