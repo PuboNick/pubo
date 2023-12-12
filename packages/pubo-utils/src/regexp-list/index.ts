@@ -15,7 +15,6 @@ export class RegExpList {
     if (!this._RegExpList) {
       this._RegExpList = this.list.map(this.getRegEXP);
     }
-
     return this._RegExpList.some((item) => item.test(value));
   }
 }
