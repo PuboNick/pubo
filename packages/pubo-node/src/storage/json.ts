@@ -1,9 +1,11 @@
 import { readFileSync, writeFile } from 'fs';
 import * as pako from 'pako';
+import SparkMd5 from 'spark-md5';
 
 export class JsonStorage {
   private readonly path: string;
   private _state: any = {};
+  private _md5: any = '';
 
   constructor(path: string) {
     this.path = path;
@@ -14,6 +16,7 @@ export class JsonStorage {
     try {
       const buf = readFileSync(this.path);
       const data = pako.inflate(buf, { to: 'string' });
+      this._md5 = SparkMd5.hash(data);
       this._state = JSON.parse(data);
     } catch (err) {
       this.state = {};
@@ -21,10 +24,15 @@ export class JsonStorage {
   }
 
   private set state(values: any) {
-    const data = pako.deflate(JSON.stringify(values));
+    this._state = values;
+    const str = JSON.stringify(values);
+    const md5 = SparkMd5.hash(values);
+    if (md5 === this._md5) {
+      return;
+    }
+    const data = pako.deflate(str);
     const buf = Buffer.from(data);
     writeFile(this.path, buf, (err) => err && console.log(err));
-    this._state = values;
   }
 
   private get state(): any {
