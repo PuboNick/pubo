@@ -13,7 +13,7 @@ export { HistoryStack } from './stack';
 export { WatchDog } from './watch-dog';
 export { Level } from './level';
 export { callbackToPromise } from './promise';
-export { getAngle, getDistance, getCenter, degrees, radians, filterKeyPoints, rotate } from './math/geometry';
+export { getAngle, getDistance, getCenter, degrees, radians, filterKeyPoints, getRotate } from './math/geometry';
 export { RegExpList } from './regexp-list';
 export { concatArray } from './array';
 export { SensorDataFilter } from './filter/sensor';
