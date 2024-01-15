@@ -66,3 +66,10 @@ export function getCenter(list: Point2D[] | [number, number][]): Point2D {
   }
   return { x: tmp[0] / list.length, y: tmp[1] / list.length };
 }
+
+// 2D旋转
+export function rotate(data: [number, number], rad: number) {
+  const x = Math.cos(rad) * data[0] - Math.sin(rad) * data[1];
+  const y = Math.sin(rad) * data[0] + Math.cos(rad) * data[1];
+  return [x, y];
+}

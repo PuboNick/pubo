@@ -1,5 +1,3 @@
-import { throttle } from 'pubo-utils';
-
 type OnMove = (n: { offsetX: number; offsetY: number; key?: string }) => void;
 type OnMoveEnd = () => void;
 
@@ -16,13 +14,15 @@ export class DragMethod {
   private readonly onMouseMove;
   private readonly onMouseUp;
   public readonly onMouseDown;
+  public readonly onTouchStart;
   public onMove?: OnMove;
   public onMoveEnd?: OnMoveEnd;
 
   constructor({ key = '', onMove, onMoveEnd }: DragMethodProps = {}) {
     this.key = key;
     this.onMouseDown = this._onMouseDown.bind(this);
-    this.onMouseMove = throttle(this._onMouseMove.bind(this), 1000 / 100);
+    this.onTouchStart = this._onMouseDown.bind(this);
+    this.onMouseMove = this._onMouseMove.bind(this);
     this.onMouseUp = this._onMouseUp.bind(this);
     this.onMove = onMove;
     this.onMoveEnd = onMoveEnd;
@@ -33,18 +33,29 @@ export class DragMethod {
       return;
     }
 
+    if (e.preventDefault) {
+      e.preventDefault();
+    } else {
+      e.returnValue = false;
+    }
+
+    const pageX = e.pageX ?? e.touches[0]?.pageX;
+    const pageY = e.pageY ?? e.touches[0]?.pageY;
+
     this.onMove({
-      offsetX: e.pageX - this.cache.pageX,
-      offsetY: e.pageY - this.cache.pageY,
+      offsetX: pageX - this.cache.pageX,
+      offsetY: pageY - this.cache.pageY,
       key: this.key,
     });
-    this.cache.pageX = e.pageX;
-    this.cache.pageY = e.pageY;
+    this.cache.pageX = pageX;
+    this.cache.pageY = pageY;
   }
 
   private clearListener() {
     window.removeEventListener('mousemove', this.onMouseMove);
+    window.removeEventListener('touchmove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
+    window.removeEventListener('touchend', this.onMouseUp);
   }
 
   private _onMouseUp() {
@@ -56,7 +67,7 @@ export class DragMethod {
   }
 
   private _onMouseDown(e: any) {
-    if (e.preventDefault) {
+    if (e.preventDefault && e.pageX) {
       e.preventDefault();
     } else {
       e.returnValue = false;
@@ -65,10 +76,16 @@ export class DragMethod {
       return;
     }
     this.clearListener();
+    const pageX = e.pageX ?? e.touches[0]?.pageX;
+    const pageY = e.pageY ?? e.touches[0]?.pageY;
+
     this.cache.dragging = true;
-    this.cache.pageX = e.pageX;
-    this.cache.pageY = e.pageY;
+    this.cache.pageX = pageX;
+    this.cache.pageY = pageY;
+
     window.addEventListener('mousemove', this.onMouseMove);
+    window.addEventListener('touchmove', this.onMouseMove, { passive: false });
     window.addEventListener('mouseup', this.onMouseUp);
+    window.addEventListener('touchend', this.onMouseUp, { passive: false });
   }
 }
