@@ -14,11 +14,11 @@ export class WatchDog {
   }
 
   feed() {
-    clearTimeout(this.timeout);
     this.init();
   }
 
   init() {
+    clearTimeout(this.timeout);
     this.timeout = setTimeout(() => this.onTimeout(), this.limit * 1000);
   }
 
