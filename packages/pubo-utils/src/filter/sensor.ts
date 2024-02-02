@@ -99,3 +99,19 @@ export class SensorDataFilter {
     return { res, dic: a };
   }
 }
+
+export class StringSplit {
+  private readonly _splitSymbol: string;
+  private _cache = '';
+
+  constructor(splitSymbol: string) {
+    this._splitSymbol = splitSymbol;
+  }
+
+  split(str: string): string[] {
+    const tmp = this._cache + str;
+    const arr = tmp.split(this._splitSymbol);
+    this._cache = arr.splice(arr.length - 1, 1)[0];
+    return arr;
+  }
+}
