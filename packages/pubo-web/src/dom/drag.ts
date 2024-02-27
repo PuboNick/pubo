@@ -1,4 +1,4 @@
-type OnMove = (n: { offsetX: number; offsetY: number; key?: string }) => void;
+type OnMove = (n: { offsetX: number; offsetY: number; key?: string; pageX: number; pageY: number }) => void;
 type OnMoveEnd = () => void;
 
 interface DragMethodProps {
@@ -45,6 +45,8 @@ export class DragMethod {
     this.onMove({
       offsetX: pageX - this.cache.pageX,
       offsetY: pageY - this.cache.pageY,
+      pageX,
+      pageY,
       key: this.key,
     });
     this.cache.pageX = pageX;
