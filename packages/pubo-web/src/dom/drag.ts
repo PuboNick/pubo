@@ -11,9 +11,29 @@ type OnMoveEnd = () => void;
 
 interface DragMethodProps {
   key?: string;
+  /**
+   * Tracks the movement of the drag and triggers the onMove callback.
+   * @callback OnMove
+   * @param {object} options - The options object.
+   * @param {number} options.offsetX - The X offset of the drag.
+   * @param {number} options.offsetY - The Y offset of the drag.
+   * @param {number} options.pageX - The X coordinate of the drag.
+   * @param {number} options.pageY - The Y coordinate of the drag.
+   * @param {number} options.startX - The initial X coordinate of the drag.
+   * @param {number} options.startY - The initial Y coordinate of the drag.
+   * @param {string} options.key - The key associated with the drag.
+   */
   onMove?: OnMove;
+  /**
+   * Ends the drag event and triggers the onMoveEnd callback.
+   * @callback OnMoveEnd
+   */
   onMoveEnd?: OnMoveEnd;
 }
+
+/**
+ * Class for handling drag events in a UI.
+ */
 
 export class DragMethod {
   private readonly key?: string = '';

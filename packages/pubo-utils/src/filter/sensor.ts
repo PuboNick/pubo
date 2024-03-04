@@ -80,6 +80,12 @@ export class SensorDataFilter {
     return res;
   }
 
+  /**
+   * A function to calculate the most frequent element in the 'tmp' array and its frequency.
+   *
+   * @return {object} An object containing the most frequent element and its frequency.
+   */
+
   private getMostNumberOfTmp() {
     const a = {};
     let max = 0;
@@ -99,6 +105,13 @@ export class SensorDataFilter {
     return { res, dic: a };
   }
 }
+
+/**
+ * Splits the input string using the specified split symbol and returns an array of substrings.
+ *
+ * @param {string} str - the input string to be split
+ * @return {string[]} an array of substrings
+ */
 
 export class StringSplit {
   private readonly _splitSymbol: string;

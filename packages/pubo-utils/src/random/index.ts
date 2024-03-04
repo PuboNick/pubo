@@ -1,3 +1,10 @@
+/**
+ * Generates a random string of specified length.
+ *
+ * @param {number} n - The length of the random string to generate
+ * @return {string} The randomly generated string
+ */
+
 export const random = (n = 8) => {
   const ra = (x: number) =>
     Math.random()
@@ -20,6 +27,12 @@ export const random = (n = 8) => {
   return res;
 };
 
+/**
+ * Generates a random number within the specified range.
+ *
+ * @param {number[]} range - The range within which to generate the random number.
+ * @return {number} The randomly generated number within the specified range.
+ */
 export const randomRangeNum = (range) => {
   const size = Math.abs(range[1] - range[0]);
   return Math.random() * size + Math.min(...range);

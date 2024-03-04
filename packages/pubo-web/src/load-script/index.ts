@@ -1,3 +1,10 @@
+/**
+ * Loads a script from the given URL with the provided options.
+ *
+ * @param {string} url - The URL of the script to load
+ * @param {any} options - Additional options for loading the script
+ * @return {Promise<any>} A Promise that resolves with the URL once the script is loaded
+ */
 export const loadScript = (url: string, options: any = {}) => {
   const findScript = () => {
     const list: any = document.getElementsByTagName('script');

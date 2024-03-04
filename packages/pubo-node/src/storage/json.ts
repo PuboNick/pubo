@@ -1,4 +1,4 @@
-import { readFileSync, writeFile } from 'fs';
+import { readFileSync, writeFile, mkdirSync } from 'fs';
 import * as pako from 'pako';
 
 export class JsonStorage {
@@ -16,6 +16,7 @@ export class JsonStorage {
       const data = pako.inflate(buf, { to: 'string' });
       this._state = JSON.parse(data);
     } catch (err) {
+      mkdirSync(this.path.split('/').slice(0, -1).join('/'), { recursive: true });
       this.state = {};
     }
   }
