@@ -20,6 +20,7 @@ export class JsonStorage {
       const data = pako.inflate(buf, { to: 'string' });
       return JSON.parse(data);
     } catch (err) {
+      console.log(err);
       mkdirSync(this.path.split('/').slice(0, -1).join('/'), { recursive: true });
       return {};
     }
