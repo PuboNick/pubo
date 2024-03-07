@@ -21,7 +21,8 @@ export class JsonStorage {
       return JSON.parse(data);
     } catch (err) {
       console.log(err);
-      mkdirSync(this.path.split('/').slice(0, -1).join('/'), { recursive: true });
+      const str = process.platform === 'win32' ? '\\' : '/';
+      mkdirSync(this.path.split(str).slice(0, -1).join(str), { recursive: true });
       return {};
     }
   }
