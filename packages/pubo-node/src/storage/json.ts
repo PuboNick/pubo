@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import debounce from 'lodash.debounce';
+import { debounce } from 'pubo-utils';
 
 export class JsonStorage {
   private readonly path: string;
