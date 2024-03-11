@@ -7,7 +7,7 @@
     "clean": "lerna clean --yes",
     "build": "lerna run build",
     "pub": "yarn run build && lerna publish",
-    "pub:beta": "yarn run build && lerna publish --dist-tag beta --no-verify-access"
+    "pub:beta": "yarn run build && lerna publish --dist-tag beta"
   },
   "husky": {
     "hooks": {
@@ -36,7 +36,7 @@
     "jest": "^26.0.1",
     "jest-fetch-mock": "^3.0.3",
     "jest-localstorage-mock": "^2.4.18",
-    "lerna": "4.x",
+    "lerna": "^8.1.2",
     "prettier": "^2.8.8",
     "pretty-quick": "^2.0.1",
     "surge": "^0.21.3",
