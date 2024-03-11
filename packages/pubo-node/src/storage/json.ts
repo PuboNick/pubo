@@ -10,11 +10,6 @@ export class JsonStorage {
     return this._state;
   }
 
-  set state(values) {
-    this._state = values;
-    this.sync();
-  }
-
   constructor(path: string) {
     this.path = path;
     this.restore();
@@ -42,19 +37,20 @@ export class JsonStorage {
 
   get(key?: string) {
     if (!key) {
-      return { ...this.state };
+      return this.state;
     } else {
       return this.state[key];
     }
   }
 
   set(key: string, values: any) {
-    const temp = { ...this.state };
-    temp[key] = values;
-    this.state = temp;
+    this._state[key] = values;
+    this.sync();
   }
 
   merge(values: any) {
-    this.state = { ...this.state, ...values };
+    for (const key of Object.keys(values)) {
+      this._state[key] = values[key];
+    }
   }
 }
