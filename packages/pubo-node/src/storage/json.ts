@@ -4,6 +4,7 @@ import { debounce } from 'pubo-utils';
 export class JsonStorage {
   private readonly path: string;
   private _state: any = {};
+
   private readonly sync: any;
 
   get state() {
