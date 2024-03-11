@@ -32,6 +32,10 @@ export default class WebsocketClient {
     this.emitter.emit('message', e.data);
   }
 
+  get status() {
+    return this._status;
+  }
+
   connect() {
     if (this.client) {
       return;
