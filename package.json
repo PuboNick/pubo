@@ -7,7 +7,7 @@
     "clean": "lerna clean --yes",
     "build": "lerna run build",
     "pub": "yarn run build && lerna publish",
-    "pub:beta": "yarn run build && lerna publish --dist-tag beta"
+    "pub:beta": "yarn run build && lerna publish --dist-tag beta --no-verify-access"
   },
   "husky": {
     "hooks": {

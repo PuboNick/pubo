@@ -52,5 +52,6 @@ export class JsonStorage {
     for (const key of Object.keys(values)) {
       this._state[key] = values[key];
     }
+    this.sync();
   }
 }
