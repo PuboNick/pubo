@@ -1,14 +1,13 @@
 import { Emitter } from 'pubo-utils';
 
-export default class WebsocketClient {
+export class WebsocketClient {
   private client: WebSocket | null = null;
-  private _status = 0;
+  private _status = 0; // 0 默认 1 已连接 2 断开连接 3 重连
   private readonly url: string;
   emitter = new Emitter();
 
   constructor({ url }: { url: string }) {
     this.url = url;
-    this.connect();
   }
 
   private reconnect() {
@@ -32,7 +31,7 @@ export default class WebsocketClient {
     this.emitter.emit('message', e.data);
   }
 
-  get status() {
+  public get status() {
     return this._status;
   }
 
@@ -44,6 +43,7 @@ export default class WebsocketClient {
     this.client.onclose = this.onClose.bind(this);
     this.client.onmessage = this.onMessage.bind(this);
     this.client.onopen = () => {
+      this.emitter.emit('connect');
       this._status = 1;
     };
   }
