@@ -1,6 +1,7 @@
 export class SyncQueue {
   private readonly cache: any[] = [];
   private running = false;
+  private len = 0;
 
   private async _run({ fn, promise }) {
     try {
@@ -19,6 +20,7 @@ export class SyncQueue {
       this.running = true;
     }
     const item = this.cache.shift();
+    this.len -= 1;
     if (typeof item.fn === 'function') {
       await this._run(item);
     }
@@ -26,6 +28,8 @@ export class SyncQueue {
   }
 
   public push(fn) {
+    this.len += 1;
+
     return new Promise((resolve, reject) => {
       this.cache.push({ fn, promise: { resolve, reject } });
       if (!this.running) {
@@ -35,6 +39,6 @@ export class SyncQueue {
   }
 
   get length() {
-    return this.cache.length;
+    return this.len;
   }
 }

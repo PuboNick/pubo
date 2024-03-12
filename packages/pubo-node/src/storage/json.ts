@@ -1,11 +1,10 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { debounce } from 'pubo-utils';
+import { readFileSync, writeFile, mkdirSync } from 'fs';
+import { SyncQueue } from 'pubo-utils';
 
 export class JsonStorage {
   private readonly path: string;
   private _state: any = {};
-
-  private readonly sync: any;
+  private readonly queue = new SyncQueue();
 
   get state() {
     return this._state;
@@ -14,14 +13,25 @@ export class JsonStorage {
   constructor(path: string) {
     this.path = path;
     this.restore();
+  }
 
-    this.sync = debounce(() => {
-      try {
-        writeFileSync(this.path, JSON.stringify(this._state));
-      } catch (err) {
-        console.log(err);
-      }
-    }, 1000);
+  private sync() {
+    if (this.queue.length > 0) {
+      return;
+    }
+    this.queue.push(this._sync.bind(this));
+  }
+
+  private async _sync() {
+    return new Promise((resolve, reject) => {
+      writeFile(this.path, JSON.stringify(this._state), (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve('');
+        }
+      });
+    });
   }
 
   private restore(): any {
@@ -31,7 +41,9 @@ export class JsonStorage {
     } catch (err) {
       console.log(err);
       const str = process.platform === 'win32' ? '\\' : '/';
-      mkdirSync(this.path.split(str).slice(0, -1).join(str), { recursive: true });
+      if (str) {
+        mkdirSync(this.path.split(str).slice(0, -1).join(str), { recursive: true });
+      }
       this._state = {};
     }
   }
