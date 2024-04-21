@@ -14,40 +14,37 @@ class GrpcClient {
   private client: any;
 
   constructor({ url, options = {}, Grpc, cert }: any) {
-    this.url = url;
-    this.Grpc = Grpc;
     const opt = { 'grpc.max_send_message_length': -1, 'grpc.max_receive_message_length': -1, ...options };
     const credentials = cert ? Grpc.credentials.createSsl(cert) : Grpc.credentials.createInsecure();
+
+    this.url = url;
+    this.Grpc = Grpc;
     this.credentials = credentials;
     this.options = opt;
     this.options.timeout = this.options.timeout ?? 5000;
-    this.client = new Grpc.Client(url, credentials, opt);
+  }
+
+  private passThrough(argument) {
+    return argument;
   }
 
   reset() {
-    if (this.client) {
-      this.client.close();
-      delete this.client;
+    if (!this.client) {
+      return;
     }
 
-    this.client = new this.Grpc.Client(this.url, this.credentials, this.options);
-  }
-
-  passThrough(argument) {
-    return argument;
+    this.client.close();
+    this.client = null;
   }
 
   request(service, method, data) {
     const path = `/${service}/${method}`;
-    let timeout: any;
-    let ended = false;
-    return new Promise((resolve, reject) => {
-      const request = this.client.makeUnaryRequest(path, this.passThrough, this.passThrough, data, (err, res) => {
-        if (ended) {
-          return;
-        }
-        clearTimeout(timeout);
+    if (!this.client) {
+      this.client = new this.Grpc.Client(this.url, this.credentials, this.options);
+    }
 
+    return new Promise((resolve, reject) => {
+      this.client.makeUnaryRequest(path, this.passThrough, this.passThrough, data, (err, res) => {
         if (err) {
           this.reset();
           reject(err);
@@ -55,17 +52,6 @@ class GrpcClient {
           resolve(res);
         }
       });
-
-      if (this.options.timeout < 0) {
-        return;
-      }
-
-      timeout = setTimeout(() => {
-        ended = true;
-        request.cancel();
-        this.reset();
-        reject(new Error('timeout'));
-      }, this.options.timeout);
     });
   }
 }
