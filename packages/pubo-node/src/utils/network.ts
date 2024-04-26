@@ -3,7 +3,7 @@ import { exec } from 'child_process';
 function parseNetworkData(data) {
   return data
     .toString()
-    .replace(/\*-network:.*\n/g, '-----')
+    .replace(/\*-network.*\n/g, '-----')
     .split('-----')
     .filter((item) => item.trim())
     .map((item) => {
