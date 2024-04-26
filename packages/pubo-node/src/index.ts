@@ -5,3 +5,4 @@ export { PuboFileSystem } from './file-system';
 export { SIGKILL } from './child-process';
 export { isPortAvailable } from './utils';
 export { pitch } from './pitch';
+export { getWifiName, getNetworks } from './utils/network';
