@@ -26,6 +26,11 @@ export async function isProcessAlive(pid) {
 
 export async function SIGKILL(pid: number) {
   kill(pid, 'SIGKILL');
+
+  if (process.platform === 'win32') {
+    return;
+  }
+
   exec(`kill -9 ${pid}`);
 
   try {
