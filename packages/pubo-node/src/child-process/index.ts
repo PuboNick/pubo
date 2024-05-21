@@ -25,13 +25,13 @@ export async function isProcessAlive(pid) {
 }
 
 export async function SIGKILL(pid: number) {
-  kill(pid, 'SIGKILL');
+  kill(pid, 'SIGINT');
 
   if (process.platform === 'win32') {
     return;
   }
 
-  exec(`kill -9 ${pid}`);
+  exec(`kill -2 ${pid}`);
 
   try {
     await waitFor(async () => isProcessAlive(pid), { checkTime: 100, timeout: 10000 });
