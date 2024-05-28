@@ -49,11 +49,11 @@ export class WebsocketClient {
   }
 
   close() {
+    this._status = 2;
     if (this.client) {
       this.client.close();
-      this.client = null;
-      this._status = 2;
     }
+    this.client = null;
   }
 
   send(data: any, isJson = false) {
