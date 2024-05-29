@@ -61,6 +61,16 @@ export class Emitter implements EmitterType {
     }
   }
 
+  async emitSync(event: string, ...args: any) {
+    if (Array.isArray(this.state[event])) {
+      for (const func of this.state[event]) {
+        if (typeof func === 'function') {
+          await func(...args);
+        }
+      }
+    }
+  }
+
   clone() {
     return { state: { ...this.state }, ids: { ...this.ids } };
   }
