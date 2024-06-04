@@ -1,6 +1,5 @@
 import { exec } from 'child_process';
 import { waitFor } from 'pubo-utils';
-import kill from 'tree-kill';
 
 export async function getProcessName(pid): Promise<string> {
   return new Promise((resolve) => {
@@ -25,9 +24,9 @@ export async function isProcessAlive(pid) {
 }
 
 export async function SIGKILL(pid: number, type = 2) {
-  kill(pid, 'SIGINT');
-
   if (process.platform === 'win32') {
+    const signal = type === 9 ? 'SIGKILL' : 'SIGINT';
+    require('tree-kill')(pid, signal);
     return;
   }
 
