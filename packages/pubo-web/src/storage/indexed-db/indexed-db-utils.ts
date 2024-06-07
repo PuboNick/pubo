@@ -23,7 +23,7 @@ export class IndexedDBUtils {
       const request = this.indexedDB?.open(this.name, this.version);
       request.onupgradeneeded = async (event) => {
         // @ts-ignore
-        this.db = event.target.result;
+        const db = event.target.result;
 
         // @ts-ignore
         this.transaction = event.target.transaction;
@@ -37,13 +37,18 @@ export class IndexedDBUtils {
         };
 
         for (const table of this.tables) {
-          this.createTable(table);
+          if (!db.objectStoreNames.contains(table.name)) {
+            db.createObjectStore(table.name, table.options || { keyPath: '_id', autoIncrement: true });
+          }
         }
 
-        resolve('success');
+        this.db = db;
       };
+
       request.onsuccess = () => {
-        this.db = request.result;
+        if (!this.db) {
+          this.db = request.result;
+        }
         resolve('success');
       };
       request.onerror = (error) => {
@@ -51,12 +56,6 @@ export class IndexedDBUtils {
         reject(error);
       };
     });
-  }
-
-  private createTable(table: IndexedTable) {
-    if (!this.db.objectStoreNames.contains(table.name)) {
-      this.db.createObjectStore(table.name, table.options || { keyPath: '_id', autoIncrement: true });
-    }
   }
 
   private createTransaction(
