@@ -23,16 +23,13 @@ export async function isProcessDied(pid) {
   return name.split(':')[2]?.trim() === 'No such file or directory';
 }
 
-export async function SIGKILL(pid: number, type = 2) {
+export async function SIGKILL(pid, type = 2) {
   const signal = type === 9 ? 'SIGKILL' : 'SIGINT';
   require('tree-kill')(pid, signal);
 
   if (process.platform === 'win32') {
     return;
   }
-
-  exec(`kill -${type} ${pid}`);
-  require('tree-kill')(pid, signal);
 
   try {
     await waitFor(async () => isProcessDied(pid), { checkTime: 100, timeout: 10000 });
