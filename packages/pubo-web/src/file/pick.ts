@@ -6,9 +6,11 @@ export const pickFiles = (): Promise<FileList> => {
     const onFocus = () => {
       document.body.removeChild(el);
       window.removeEventListener('focus', onFocus);
-      if (!picked) {
-        reject('no files picked');
-      }
+      setTimeout(() => {
+        if (!picked) {
+          reject('no files picked');
+        }
+      }, 1000);
     };
     el.type = 'file';
     el.style.visibility = 'hidden';
