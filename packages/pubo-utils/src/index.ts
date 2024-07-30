@@ -27,5 +27,5 @@ export {
   getVectorTheta,
 } from './math/geometry';
 export { RegExpList } from './regexp-list';
-export { concatArray } from './array';
 export { SensorDataFilter, StringSplit } from './filter/sensor';
+export { lower2camel } from './str';

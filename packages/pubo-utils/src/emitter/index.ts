@@ -51,21 +51,21 @@ export class Emitter implements EmitterType {
     this.state.length = 0;
   }
 
-  emit(event: string, ...args: any) {
+  emit(event: string, payload: any) {
     if (Array.isArray(this.state[event])) {
       for (const func of this.state[event]) {
         if (typeof func === 'function') {
-          func(...args);
+          func(payload);
         }
       }
     }
   }
 
-  async emitSync(event: string, ...args: any) {
+  async emitSync(event: string, payload: any) {
     if (Array.isArray(this.state[event])) {
       for (const func of this.state[event]) {
         if (typeof func === 'function') {
-          await func(...args);
+          await func(payload);
         }
       }
     }
@@ -78,5 +78,18 @@ export class Emitter implements EmitterType {
   restore(snapshot) {
     this.state = snapshot.state;
     this.ids = snapshot.ids;
+  }
+}
+
+export class CacheEmitter extends Emitter {
+  private readonly _cache: any = {};
+
+  emit(event: string, payload: any): void {
+    this._cache[event] = payload;
+    super.emit(event, payload);
+  }
+
+  getState(event: string) {
+    return this._cache[event];
   }
 }

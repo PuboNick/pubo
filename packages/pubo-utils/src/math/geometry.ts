@@ -1,4 +1,12 @@
-export const getDistance = (a: any, b: any) => {
+export interface Point2D {
+  x: number;
+  y: number;
+}
+
+export type Vector2D = [number, number];
+
+// 获取两点的距离
+export const getDistance = (a: Point2D, b: Point2D): number => {
   return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 };
 
@@ -17,11 +25,7 @@ export const getAngle = ({ w, h }: { w: number; h: number }) => {
   return degrees(Math.atan2(h, w));
 };
 
-export interface Point2D {
-  x: number;
-  y: number;
-}
-
+// 关键点过滤
 export function filterKeyPoints(list: Point2D[], len = 0.5): Point2D[] {
   if (list.length < 3 || len <= 0) {
     return list;
@@ -53,7 +57,7 @@ export function getCenter(list: Point2D[] | [number, number][]): Point2D {
 }
 
 // 2D旋转
-export function getRotate(data: [number, number], theta: number) {
+export function getRotate(data: Vector2D, theta: number): Vector2D {
   const x = Math.cos(theta) * data[0] - Math.sin(theta) * data[1];
   const y = Math.sin(theta) * data[0] + Math.cos(theta) * data[1];
   return [x, y];
