@@ -21,10 +21,10 @@
   "dependencies": {
     "@types/node": "^17.0.25",
     "pako": "^2.0.4",
-    "pubo-utils": "^1.0.126",
+    "pubo-utils": "*",
     "tree-kill": "^1.2.2"
   },
-  "gitHead": "68da30ebe79e41302c2b5ad6caa47ba114505015",
+  "gitHead": "754d746f48c169330b973ca9825e0377520586aa",
   "devDependencies": {
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.2",
