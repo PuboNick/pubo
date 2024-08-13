@@ -50,5 +50,8 @@
   "main": "index.js",
   "license": "MIT",
   "author": "Jiang Jinming <360104322@qq.com>",
-  "repository": "git@github.com:PuboNick/pubo.git"
+  "repository": "git@github.com:PuboNick/pubo.git",
+  "workspaces": [
+    "packages/*"
+  ]
 }
