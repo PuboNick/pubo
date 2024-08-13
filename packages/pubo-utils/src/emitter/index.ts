@@ -3,7 +3,8 @@ import { random } from '../random';
 interface EmitterType {
   on: (event: string, func: any) => string;
   cancel: (id?: string) => void;
-  emit: (event: string, ...args: any) => any;
+  emit: (event: string, payload?: any) => any;
+  emitSync: (event: string, payload?: any) => Promise<any>;
   clear: () => void;
   clone: () => any;
   restore: (snapshot: any) => void;
@@ -51,7 +52,7 @@ export class Emitter implements EmitterType {
     this.state.length = 0;
   }
 
-  emit(event: string, payload: any) {
+  emit(event: string, payload?: any) {
     if (Array.isArray(this.state[event])) {
       for (const func of this.state[event]) {
         if (typeof func === 'function') {
@@ -61,7 +62,7 @@ export class Emitter implements EmitterType {
     }
   }
 
-  async emitSync(event: string, payload: any) {
+  async emitSync(event: string, payload?: any) {
     if (Array.isArray(this.state[event])) {
       for (const func of this.state[event]) {
         if (typeof func === 'function') {
@@ -84,7 +85,7 @@ export class Emitter implements EmitterType {
 export class CacheEmitter extends Emitter {
   private readonly _cache: any = {};
 
-  emit(event: string, payload: any): void {
+  emit(event: string, payload?: any): void {
     this._cache[event] = payload;
     super.emit(event, payload);
   }
