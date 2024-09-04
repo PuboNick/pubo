@@ -6,4 +6,4 @@ export { SIGKILL, isProcessDied, getProcessName } from './child-process';
 export { isPortAvailable } from './utils';
 export { pitch } from './pitch';
 export { getWifiName, getNetworks } from './utils/network';
-export { RosTopic, RosTopicManager } from './ros/topic';
+export { RosTopicManager, RosTopic } from './ros/topic';

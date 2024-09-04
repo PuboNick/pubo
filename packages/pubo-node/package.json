@@ -24,7 +24,7 @@
     "pubo-utils": "^1.0.129",
     "tree-kill": "^1.2.2"
   },
-  "gitHead": "db8750213d510b94cba3fa9d8f8e8d67bba0c621",
+  "gitHead": "702e5546ae7853a97c9d0c8343e46200701fc6f0",
   "devDependencies": {
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.2",
