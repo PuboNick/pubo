@@ -61,8 +61,7 @@ export class RosTopic {
     const data = YAML.stringify(payload);
     return new Promise((resolve) => {
       const child = exec(`rostopic pub -1 ${this.topic} ${this.messageType} "${data}"`);
-      child.stdout?.once('data', (buf) => {
-        console.log(buf.toString());
+      child.stdout?.once('data', () => {
         child?.pid && SIGKILL(child?.pid);
         resolve('');
       });
