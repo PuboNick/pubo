@@ -21,7 +21,7 @@
   "dependencies": {
     "pubo-utils": "^1.0.128"
   },
-  "gitHead": "c25a7cc3d802350a8333ceffc13af2278ef6c3ee",
+  "gitHead": "db8750213d510b94cba3fa9d8f8e8d67bba0c621",
   "devDependencies": {
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.2",
