@@ -9,13 +9,15 @@ interface StorageInstance {
   setState: (state: any) => Promise<any>;
 }
 
+// 主线程的实现
 class Manager implements StorageInstance {
   private readonly path: string;
   private _state: any = {};
   private readonly queue = new SyncQueue();
   private readonly key: string;
+  private readonly defaultState: any;
 
-  constructor(path: string) {
+  constructor(path: string, defaultState?: any) {
     this.path = path;
     this.key = encodeURIComponent(path);
     cluster.on('online', (worker) => {
@@ -32,7 +34,7 @@ class Manager implements StorageInstance {
     let payload;
     if (message.type === 'get') {
       payload = await this.getState();
-    } else {
+    } else if (message.type === 'set') {
       payload = await this.setState(message.payload);
     }
 
@@ -67,7 +69,7 @@ class Manager implements StorageInstance {
       if (str) {
         mkdirSync(this.path.split(str).slice(0, -1).join(str), { recursive: true });
       }
-      this._state = {};
+      this.setState(this.defaultState ?? {});
     }
   }
 
@@ -81,6 +83,7 @@ class Manager implements StorageInstance {
   }
 }
 
+// work 线程的实现
 class Worker implements StorageInstance {
   private readonly key: string;
   private readonly callback: any = {};
@@ -119,12 +122,19 @@ class Worker implements StorageInstance {
   }
 }
 
+export interface JsonStorageOptions {
+  // 初始值，程序运行时会重置为初始值
+  initialState?: any;
+  // 默认值
+  defaultState?: any;
+}
+
 export class JsonStorage {
   private readonly instance: StorageInstance;
 
-  constructor(path: string, options: { initialState: any } = { initialState: null }) {
+  constructor(path: string, options: JsonStorageOptions) {
     if (cluster.isPrimary) {
-      this.instance = new Manager(path);
+      this.instance = new Manager(path, options.defaultState);
     } else {
       this.instance = new Worker(path);
     }
