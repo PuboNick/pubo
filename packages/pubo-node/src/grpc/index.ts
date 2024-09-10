@@ -1,9 +1,13 @@
-interface CreateClientProps {
+export interface CreateClientProps {
   url: string;
   options?: any;
   ServiceImp: any;
   Grpc: any;
   cert?: Buffer;
+}
+
+function passThrough(argument) {
+  return argument;
 }
 
 class GrpcClient {
@@ -12,6 +16,8 @@ class GrpcClient {
   private readonly Grpc: any;
   private readonly credentials: any;
   private client: any;
+  private _timeout: any;
+  connections = 0;
 
   constructor({ url, options = {}, Grpc, cert }: any) {
     const opt = { 'grpc.max_send_message_length': -1, 'grpc.max_receive_message_length': -1, ...options };
@@ -21,42 +27,86 @@ class GrpcClient {
     this.Grpc = Grpc;
     this.credentials = credentials;
     this.options = opt;
-    this.options.timeout = this.options.timeout ?? 5000;
+    this.options.timeout = this.options.timeout ?? 60000;
   }
 
-  private passThrough(argument) {
-    return argument;
-  }
+  async request(service, method, data) {
+    this.connections += 1;
 
-  reset() {
-    if (!this.client) {
-      return;
-    }
-
-    this.client.close();
-    this.client = null;
-  }
-
-  request(service, method, data) {
-    const path = `/${service}/${method}`;
     if (!this.client) {
       this.client = new this.Grpc.Client(this.url, this.credentials, this.options);
     }
 
+    let error;
+    let result;
+
+    try {
+      result = await this._request({ service, method, data });
+    } catch (err) {
+      error = err;
+    }
+
+    this.connections -= 1;
+
+    if (this.connections < 0) {
+      this.connections = 0;
+    }
+
+    if (this.connections < 1) {
+      if (this._timeout) {
+        clearTimeout(this._timeout);
+        this._timeout = null;
+      }
+      this._timeout = setTimeout(() => this.close(), 60000);
+    }
+
+    if (error) {
+      this.close();
+      throw new Error('grpc connection error.');
+    }
+
+    return result;
+  }
+
+  _request({ service, method, data }) {
     return new Promise((resolve, reject) => {
-      this.client.makeUnaryRequest(path, this.passThrough, this.passThrough, data, (err, res) => {
+      let _ended = false;
+      const _timeout = setTimeout(() => {
+        _ended = true;
+        this.close();
+        console.log('rpc request timeout');
+        reject(new Error('timeout'));
+      }, this.options.timeout);
+
+      let onResponse: any = (err: any, res) => {
+        if (_ended) {
+          return;
+        } else {
+          clearTimeout(_timeout);
+        }
+
         if (err) {
-          this.reset();
           reject(err);
         } else {
           resolve(res);
         }
-      });
+        onResponse = null;
+      };
+      this.client.makeUnaryRequest(`/${service}/${method}`, passThrough, passThrough, data, onResponse);
     });
+  }
+
+  close() {
+    this.client?.close();
+    this.client = null;
+    delete this.client;
   }
 }
 
+export const GrpcList: GrpcClient[] = [];
+
 export function createRpcClient<T>({ url, options = {}, ServiceImp, Grpc, cert }: CreateClientProps): T {
   const client = new GrpcClient({ url, options, Grpc, cert });
+  GrpcList.push(client);
   return new ServiceImp({ request: client.request.bind(client) });
 }
