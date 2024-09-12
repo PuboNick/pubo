@@ -93,12 +93,11 @@ async function _SIGKILL(pid, signal = 2) {
   }
 }
 
-const forEach = (tree: any, tmp: any[]) => {
+// 广度优先遍历进程树，将pid放入tmp
+const flatProcessTree = (tree: any, tmp: any[]) => {
   if (tree.children) {
-    tree.children.forEach((item) => {
-      tmp.push(item.pid);
-      forEach(item, tmp);
-    });
+    tmp.push(...tree.children.map((item) => item.pid));
+    tree.children.forEach((item) => flatProcessTree(item, tmp));
   }
 };
 
@@ -116,8 +115,9 @@ export async function SIGKILL(pid: number, signal = 2) {
   }
 
   const tree = await getProcessTree(pid);
+  // 获取所有进程PID,从叶到根
   const tmp = [tree.pid];
-  forEach(tree, tmp);
+  flatProcessTree(tree, tmp);
   tmp.reverse();
 
   for (const item of tmp) {
