@@ -19,6 +19,7 @@ class Manager implements StorageInstance {
 
   constructor(path: string, defaultState?: any) {
     this.path = path;
+    this.defaultState = defaultState;
     this.key = encodeURIComponent(path);
     cluster.on('online', (worker) => {
       worker.on('message', (message) => this.onMessage(message, worker));
@@ -132,7 +133,7 @@ export interface JsonStorageOptions {
 export class JsonStorage {
   private readonly instance: StorageInstance;
 
-  constructor(path: string, options: JsonStorageOptions) {
+  constructor(path: string, options: JsonStorageOptions = {}) {
     if (cluster.isPrimary) {
       this.instance = new Manager(path, options.defaultState);
     } else {
