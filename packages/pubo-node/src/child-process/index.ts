@@ -79,17 +79,50 @@ export const getProcessTree = async (pid: number, tree?: any) => {
 };
 
 // 杀死进程
-export async function SIGKILL(pid, type = 2) {
-  const signal = type === 9 ? 'SIGKILL' : 'SIGINT';
-  require('tree-kill')(pid, signal);
-
+async function _SIGKILL(pid, signal = 2) {
   if (process.platform === 'win32') {
+    process.kill(pid, signal);
     return;
   }
 
+  console.log(`kill -${signal} ${pid}`);
+  exec(`kill -${signal} ${pid}`);
   try {
     await waitFor(async () => isProcessDied(pid), { checkTime: 100, timeout: 10000 });
   } catch (err) {
     await SIGKILL(pid, 9);
   }
+}
+
+const forEach = (tree: any, tmp: any[]) => {
+  if (tree.children) {
+    tree.children.forEach((item) => {
+      tmp.push(item.pid);
+      forEach(item, tmp);
+    });
+  }
+};
+
+export async function SIGKILL(pid: number, signal = 2) {
+  if (process.platform === 'win32') {
+    return new Promise((resolve, reject) => {
+      exec(`taskkill /pid ${pid} /T /F`, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve('');
+        }
+      });
+    });
+  }
+
+  const tree = await getProcessTree(pid);
+  const tmp = [tree.pid];
+  forEach(tree, tmp);
+  tmp.reverse();
+
+  for (const item of tmp) {
+    await _SIGKILL(item, signal);
+  }
+  return 'success';
 }
