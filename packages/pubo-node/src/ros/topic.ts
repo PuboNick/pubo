@@ -59,16 +59,13 @@ export class RosTopic {
 
   public publish(payload) {
     const data = YAML.stringify(payload);
-    return new Promise((resolve) => {
-      const child = exec(`rostopic pub -1 ${this.topic} ${this.messageType} "${data}"`);
-      child.stdout?.once('data', () => {
-        child?.pid && SIGKILL(child?.pid);
-        resolve('');
-      });
-      child.stderr?.once('data', (err) => {
-        console.log(err.toString());
-        child?.pid && SIGKILL(child?.pid);
-        resolve('');
+    return new Promise((resolve, reject) => {
+      exec(`rostopic pub -1 ${this.topic} ${this.messageType} "${data}"`, (err, stdout) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(stdout);
+        }
       });
     });
   }
