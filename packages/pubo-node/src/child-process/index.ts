@@ -85,7 +85,6 @@ async function _SIGKILL(pid, signal = 2) {
     return;
   }
 
-  console.log(`kill -${signal} ${pid}`);
   exec(`kill -${signal} ${pid}`);
   try {
     await waitFor(async () => isProcessDied(pid), { checkTime: 100, timeout: 10000 });
