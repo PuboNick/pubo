@@ -3,13 +3,13 @@ export { FtpClient, FtpClientPool, FtpConnectOptions, FtpFile } from './ftp-clie
 export { createRpcClient } from './grpc';
 export { PuboFileSystem } from './file-system';
 export {
+  SIGKILL,
   isProcessDied,
   getProcessName,
   getProcessTree,
   getProcessByPpid,
   getProcessCpuUseByPid,
   getProcessCommandByPid,
-  SIGKILL,
 } from './child-process';
 export { isPortAvailable } from './utils';
 export { pitch } from './pitch';
