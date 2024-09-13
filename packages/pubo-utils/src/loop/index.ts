@@ -10,7 +10,7 @@ import { sleep } from '../sleep';
 
 export const loop = (cb: (stop: () => void) => Promise<void>, time: number) => {
   let onOff = true;
-  const stop = () => {
+  let stop = () => {
     onOff = false;
   };
 
@@ -21,6 +21,9 @@ export const loop = (cb: (stop: () => void) => Promise<void>, time: number) => {
       fn();
     } else {
       fn = null;
+      (cb as any) = null;
+      (stop as any) = null;
+      (onOff as any) = null;
     }
   };
   fn();
