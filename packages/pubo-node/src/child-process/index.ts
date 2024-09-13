@@ -79,7 +79,10 @@ export const getProcessTree = async (pid: number, tree?: any) => {
 };
 
 // 杀死进程
-async function _SIGKILL(pid, signal = 2) {
+async function _SIGKILL(pid, signal = 2, times = 1) {
+  if (times > 5) {
+    throw new Error('SIGKILL 失败. times > 5');
+  }
   if (process.platform === 'win32') {
     process.kill(pid, signal);
     return;
@@ -87,9 +90,9 @@ async function _SIGKILL(pid, signal = 2) {
 
   exec(`kill -${signal} ${pid}`);
   try {
-    await waitFor(async () => isProcessDied(pid), { checkTime: 100, timeout: 10000 });
+    await waitFor(async () => isProcessDied(pid), { checkTime: 1000, timeout: 10000 });
   } catch (err) {
-    await SIGKILL(pid, 9);
+    await _SIGKILL(pid, 9, times + 1);
   }
 }
 
