@@ -55,11 +55,11 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
         if (typeof stop === 'function') {
           stop();
         }
+        resolve(res);
+
         stop = null;
         (bool as any) = null;
-
         (resolve as any) = null;
-        resolve(res);
       }
     }, checkTime || 100);
 
@@ -68,10 +68,11 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
         if (typeof stop === 'function') {
           stop();
         }
-        stop = null;
-        (bool as any) = null;
+
         reject('timeout');
         (reject as any) = null;
+        stop = null;
+        (bool as any) = null;
       }, timeout);
     }
   });
