@@ -12,5 +12,6 @@ export const callbackToPromise = (fn): any => {
           resolve([...rest]);
         }
       });
+      fn = null;
     });
 };

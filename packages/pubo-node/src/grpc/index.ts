@@ -1,3 +1,5 @@
+import { sleep, waitFor } from 'pubo-utils';
+
 export interface CreateClientProps {
   url: string;
   options?: any;
@@ -18,6 +20,7 @@ class GrpcClient {
   private client: any;
   private _timeout: any;
   connections = 0;
+  private closing = false;
 
   constructor({ url, options = {}, Grpc, cert }: any) {
     const opt = { 'grpc.max_send_message_length': -1, 'grpc.max_receive_message_length': -1, ...options };
@@ -31,6 +34,9 @@ class GrpcClient {
   }
 
   async request(service, method, data) {
+    if (this.closing) {
+      await waitFor(async () => !this.closing, { checkTime: 100, timeout: 20000 });
+    }
     this.connections += 1;
 
     if (!this.client) {
@@ -38,7 +44,7 @@ class GrpcClient {
     }
 
     let error;
-    let result;
+    let result = Buffer.alloc(0);
 
     try {
       result = await this._request({ service, method, data });
@@ -61,19 +67,19 @@ class GrpcClient {
     }
 
     if (error) {
-      this.close();
+      this.restart();
       throw new Error('grpc connection error.');
     }
 
     return result;
   }
 
-  _request({ service, method, data }) {
+  _request({ service, method, data }): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       let _ended = false;
       const _timeout = setTimeout(() => {
         _ended = true;
-        this.close();
+        this.restart();
         console.log('rpc request timeout');
         reject(new Error('timeout'));
       }, this.options.timeout);
@@ -94,6 +100,17 @@ class GrpcClient {
       };
       this.client.makeUnaryRequest(`/${service}/${method}`, passThrough, passThrough, data, onResponse);
     });
+  }
+
+  async restart() {
+    if (this.closing) {
+      return;
+    }
+    console.log('rpc client restarting.');
+    this.closing = true;
+    this.close();
+    await sleep(2000);
+    this.closing = false;
   }
 
   close() {

@@ -44,10 +44,12 @@ type WaitForBool = () => boolean | Promise<boolean>;
  */
 export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?: number; timeout?: number } = {}) => {
   return new Promise((resolve, reject) => {
-    const stop = loop(async () => {
+    let stop: any = loop(async () => {
       const res = await bool();
       if (res) {
         stop();
+        stop = null;
+        (bool as any) = null;
         resolve(res);
       }
     }, checkTime || 100);
@@ -55,6 +57,8 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
     if (timeout) {
       setTimeout(() => {
         stop();
+        stop = null;
+        (bool as any) = null;
         reject('timeout');
       }, timeout);
     }

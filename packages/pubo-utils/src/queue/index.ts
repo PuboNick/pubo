@@ -10,6 +10,8 @@ export class SyncQueue {
     } catch (err) {
       promise.reject(err);
     }
+    fn = null;
+    promise = null;
   }
 
   private async run() {
