@@ -6,5 +6,10 @@
  */
 
 export const sleep = async (time: number) => {
-  await new Promise((resolve: any) => setTimeout(() => resolve(), time));
+  await new Promise((resolve: any) =>
+    setTimeout(() => {
+      resolve();
+      resolve = null;
+    }, time),
+  );
 };

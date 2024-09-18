@@ -19,6 +19,7 @@ export class WatchDog {
 
   init() {
     clearTimeout(this.timeout);
+    delete this.timeout;
     this.timeout = setTimeout(() => this.onTimeout(), this.limit * 1000);
   }
 

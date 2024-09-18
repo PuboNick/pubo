@@ -8,14 +8,18 @@ import { sleep } from '../sleep';
  * @return {Function} The stop function that can be used to stop the loop.
  */
 
-export const loop = (cb: (stop: () => void) => Promise<void>, time: number) => {
+export const loop = (cb: () => Promise<void>, time: number) => {
   let onOff = true;
   let stop = () => {
     onOff = false;
   };
 
   let fn: any = async () => {
-    await cb(stop);
+    try {
+      await cb();
+    } catch (err) {
+      console.log(err);
+    }
     await sleep(time);
     if (onOff) {
       fn();
@@ -24,6 +28,7 @@ export const loop = (cb: (stop: () => void) => Promise<void>, time: number) => {
       (cb as any) = null;
       (stop as any) = null;
       (onOff as any) = null;
+      (time as any) = null;
     }
   };
   fn();
@@ -51,6 +56,7 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
         stop = null;
         (bool as any) = null;
         resolve(res);
+        (resolve as any) = null;
       }
     }, checkTime || 100);
 
@@ -60,6 +66,7 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
         stop = null;
         (bool as any) = null;
         reject('timeout');
+        (reject as any) = null;
       }, timeout);
     }
   });
