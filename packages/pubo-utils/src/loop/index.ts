@@ -52,17 +52,22 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
     let stop: any = loop(async () => {
       const res = await bool();
       if (res) {
-        stop();
+        if (typeof stop === 'function') {
+          stop();
+        }
         stop = null;
         (bool as any) = null;
-        resolve(res);
+
         (resolve as any) = null;
+        resolve(res);
       }
     }, checkTime || 100);
 
     if (timeout) {
       setTimeout(() => {
-        stop();
+        if (typeof stop === 'function') {
+          stop();
+        }
         stop = null;
         (bool as any) = null;
         reject('timeout');
