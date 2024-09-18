@@ -1,6 +1,6 @@
 {
   "name": "pubo-utils",
-  "version": "1.0.142",
+  "version": "1.0.143",
   "main": "./lib/index.js",
   "module": "./es/index.js",
   "types": "./lib/index.d.ts",
