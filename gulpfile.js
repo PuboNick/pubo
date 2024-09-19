@@ -13,15 +13,7 @@ gulp.task('cjs', function () {
   const tsProject = ts.createProject('tsconfig.pro.json', {
     module: 'CommonJS',
   });
-  return tsProject
-    .src()
-    .pipe(tsProject())
-    .pipe(
-      babel({
-        configFile: '../../.babelrc',
-      }),
-    )
-    .pipe(gulp.dest('lib/'));
+  return tsProject.src().pipe(tsProject()).pipe(gulp.dest('lib/'));
 });
 
 gulp.task('es', function () {

@@ -66,7 +66,9 @@ export function getProcessByPpid(pid: number): Promise<number[]> {
 
 // 获取进程树
 export const getProcessTree = async (pid: number, tree?: any) => {
+  let isRoot = false;
   if (!tree) {
+    isRoot = true;
     tree = { pid, children: [] };
   }
   const pids = await getProcessByPpid(pid);
@@ -75,7 +77,11 @@ export const getProcessTree = async (pid: number, tree?: any) => {
     await getProcessTree(id, item);
     tree.children.push(item);
   }
-  return tree;
+  if (isRoot) {
+    return tree;
+  } else {
+    tree = null;
+  }
 };
 
 // 杀死进程
@@ -102,6 +108,8 @@ const flatProcessTree = (tree: any, tmp: any[]) => {
     tmp.push(...tree.children.map((item) => item.pid));
     tree.children.forEach((item) => flatProcessTree(item, tmp));
   }
+  tree = null;
+  (tmp as any) = null;
 };
 
 export async function SIGKILL(pid: number, signal = 2) {
@@ -117,11 +125,12 @@ export async function SIGKILL(pid: number, signal = 2) {
     });
   }
 
-  const tree = await getProcessTree(pid);
+  let tree = await getProcessTree(pid);
   // 获取所有进程PID,从叶到根
   const tmp = [tree.pid];
   flatProcessTree(tree, tmp);
   tmp.reverse();
+  tree = null;
 
   for (const item of tmp) {
     await _SIGKILL(item, signal);
