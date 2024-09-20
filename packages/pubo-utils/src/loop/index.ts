@@ -49,11 +49,16 @@ type WaitForBool = () => boolean | Promise<boolean>;
  */
 export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?: number; timeout?: number } = {}) => {
   return new Promise((resolve, reject) => {
+    let _timeout;
     let stop: any = loop(async () => {
       const res = await bool();
       if (res) {
         if (typeof stop === 'function') {
           stop();
+        }
+        if (_timeout) {
+          clearTimeout(_timeout);
+          _timeout = null;
         }
         resolve(res);
 
@@ -64,9 +69,13 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
     }, checkTime || 100);
 
     if (timeout) {
-      setTimeout(() => {
+      _timeout = setTimeout(() => {
         if (typeof stop === 'function') {
           stop();
+        }
+
+        if (_timeout) {
+          _timeout = null;
         }
 
         reject('timeout');
