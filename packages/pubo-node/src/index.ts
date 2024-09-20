@@ -10,6 +10,7 @@ export {
   getProcessByPpid,
   getProcessCpuUseByPid,
   getProcessCommandByPid,
+  heartbeat,
 } from './child-process';
 export { isPortAvailable } from './utils';
 export { pitch } from './pitch';

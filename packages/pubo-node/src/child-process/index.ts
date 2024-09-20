@@ -1,5 +1,5 @@
 import { exec } from 'child_process';
-import { waitFor } from 'pubo-utils';
+import { loop, waitFor } from 'pubo-utils';
 
 // 获取进程名称
 export function getProcessName(pid): Promise<string> {
@@ -137,3 +137,14 @@ export async function SIGKILL(pid: number, signal = 2) {
   }
   return 'success';
 }
+
+// 子进程心跳包
+export const heartbeat = () => {
+  if (typeof process.send !== 'function') {
+    return;
+  }
+
+  loop(async () => {
+    (process as any).send({ type: 'beat', timestamp: new Date().valueOf() });
+  }, 6000);
+};
