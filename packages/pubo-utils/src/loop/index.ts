@@ -75,6 +75,7 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
         }
 
         if (_timeout) {
+          clearTimeout(_timeout);
           _timeout = null;
         }
 

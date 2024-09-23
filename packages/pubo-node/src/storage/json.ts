@@ -22,7 +22,14 @@ class Manager implements StorageInstance {
     this.defaultState = defaultState;
     this.key = encodeURIComponent(path);
     cluster.on('online', (worker) => {
-      worker.on('message', (message) => this.onMessage(message, worker));
+      worker.on('message', (message) => {
+        this.onMessage(message, worker);
+        message = null;
+      });
+    });
+    cluster.on('exit', (worker) => {
+      worker.removeAllListeners('message');
+      worker = null;
     });
     this.restore();
   }
@@ -40,6 +47,8 @@ class Manager implements StorageInstance {
     }
 
     worker.send({ uid: message.uid, key: this.key, payload });
+    message = null;
+    worker = null;
   }
 
   private async sync() {
@@ -103,6 +112,8 @@ class Worker implements StorageInstance {
       this.callback[message.uid](message.payload);
       delete this.callback[message.uid];
     }
+
+    message = null;
   }
 
   async call({ type, payload }) {
@@ -111,6 +122,9 @@ class Worker implements StorageInstance {
       this.callback[uid] = (data) => resolve(data);
       // @ts-ignore
       process.send({ uid, type, payload, key: this.key });
+
+      payload = null;
+      type = null;
     });
   }
 
