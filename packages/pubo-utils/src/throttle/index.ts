@@ -4,6 +4,7 @@ export function throttle(cb, time: number) {
   return (...args) => {
     if (!t) {
       t = setTimeout(() => {
+        clearTimeout(t);
         onOff = true;
         t = null;
       }, time);
@@ -13,5 +14,6 @@ export function throttle(cb, time: number) {
       onOff = false;
       cb(...args);
     }
+    (args as any) = null;
   };
 }

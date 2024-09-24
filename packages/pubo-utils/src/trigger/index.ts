@@ -28,6 +28,8 @@ export class ContinuousTrigger {
   }
 
   clear() {
+    clearTimeout(this.timeout);
     this._count = 0;
+    this.timeout = 0;
   }
 }

@@ -12,12 +12,11 @@ export class WatchDog {
     this._time = limit * 1000;
 
     this.onTimeout = () => {
-      onTimeout();
-
       if (this.timeout) {
         clearTimeout(this.timeout);
         this.timeout = null;
       }
+      onTimeout();
     };
   }
 
@@ -28,7 +27,9 @@ export class WatchDog {
   init() {
     clearTimeout(this.timeout);
     this.timeout = null;
-    this.timeout = setTimeout(() => this.onTimeout(), this._time);
+    delete this.timeout;
+
+    this.timeout = setTimeout(this.onTimeout, this._time);
   }
 
   stop() {

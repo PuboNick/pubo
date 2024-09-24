@@ -10,15 +10,25 @@ export const debounce = (cb: any, time: number, first = false) => {
       if (t) {
         clearTimeout(t);
       }
-      t = setTimeout(() => (shouldRun = true), time);
+      t = setTimeout(() => {
+        clearTimeout(t);
+        shouldRun = true;
+        t = null;
+      }, time);
     };
   } else {
     let t;
     return (...args) => {
       if (t) {
         clearTimeout(t);
+        t = null;
       }
-      t = setTimeout(() => cb(...args), time);
+      t = setTimeout(() => {
+        cb(...args);
+        clearTimeout(t);
+        (args as any) = null;
+        t = null;
+      }, time);
     };
   }
 };
