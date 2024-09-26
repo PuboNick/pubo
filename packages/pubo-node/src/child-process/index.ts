@@ -96,7 +96,7 @@ async function _SIGKILL(pid, signal = 2, times = 1) {
 
   exec(`kill -${signal} ${pid}`);
   try {
-    await waitFor(async () => isProcessDied(pid), { checkTime: 1000, timeout: 10000 });
+    await waitFor(async () => isProcessDied(pid), { checkTime: 100, timeout: 4000 });
   } catch (err) {
     await _SIGKILL(pid, 9, times + 1);
   }
@@ -145,6 +145,35 @@ export const heartbeat = () => {
   }
 
   loop(async () => {
-    (process as any).send({ type: 'beat', timestamp: new Date().valueOf() });
+    await new Promise((resolve) => {
+      (process as any).send({ type: 'beat', timestamp: new Date().valueOf() }, resolve);
+    });
   }, 6000);
+};
+
+const parseAudioCard = (v: string) => {
+  let card: any = /card \d/.exec(v) ?? ['card 1'];
+  card = parseInt(card[0].replace('card ', ''), 10);
+  let device: any = /device \d/.exec(v) ?? ['device 0'];
+  device = parseInt(device[0].replace('device ', ''), 10);
+
+  return { text: v, index: `hw:${card},${device}` };
+};
+
+export const getAudioCards = (filter = ''): Promise<{ text: string; index: string }[]> => {
+  return new Promise((resolve, reject) => {
+    exec(`arecord -l`, (err, stdout) => {
+      if (err) {
+        reject(err);
+      } else {
+        const arr = stdout
+          .toString()
+          .split('\n')
+          .filter((item) => item.includes('card') && (filter ? item.includes(filter) : true))
+          .map((item) => parseAudioCard(item));
+
+        resolve(arr);
+      }
+    });
+  });
 };
