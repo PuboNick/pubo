@@ -89,10 +89,6 @@ async function _SIGKILL(pid, signal = 2, times = 1) {
   if (times > 5) {
     throw new Error('SIGKILL 失败. times > 5');
   }
-  if (process.platform === 'win32') {
-    process.kill(pid, signal);
-    return;
-  }
 
   exec(`kill -${signal} ${pid}`);
   try {
@@ -114,14 +110,8 @@ const flatProcessTree = (tree: any, tmp: any[]) => {
 
 export async function SIGKILL(pid: number, signal = 2) {
   if (process.platform === 'win32') {
-    return new Promise((resolve, reject) => {
-      exec(`taskkill /pid ${pid} /T /F`, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve('');
-        }
-      });
+    return new Promise((resolve) => {
+      exec(`taskkill /pid ${pid} /T /F`, resolve);
     });
   }
 
