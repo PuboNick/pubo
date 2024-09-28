@@ -23,7 +23,7 @@
     "pubo-utils": "^1.0.149",
     "yaml": "^2.5.1"
   },
-  "gitHead": "80b3f12b89e82dfd891e8d1e7b01495b1f2003d1",
+  "gitHead": "75e1d2cd33716ee67889de45a80fc4aaa097c4d5",
   "devDependencies": {
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.2",
