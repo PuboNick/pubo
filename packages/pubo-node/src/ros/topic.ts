@@ -1,6 +1,7 @@
 import { exec, spawn } from 'child_process';
-import { Emitter, WatchDog, StringSplit } from 'pubo-utils';
+import { Emitter, WatchDog, StringSplit, sleep } from 'pubo-utils';
 import * as YAML from 'yaml';
+
 import { SIGKILL } from '../child-process';
 
 export class RosTopic {
@@ -9,7 +10,7 @@ export class RosTopic {
   public emitter = new Emitter();
 
   private subscribed = false;
-  private readonly dog = new WatchDog({ limit: 60, onTimeout: this.onTimeout.bind(this) });
+  private readonly dog = new WatchDog({ limit: 10, onTimeout: this.onTimeout.bind(this) });
   private readonly strSplit = new StringSplit('---');
   private subscribeChildProcess: any;
 
@@ -20,12 +21,13 @@ export class RosTopic {
     this.emitter = new Emitter();
   }
 
-  private onTimeout() {
+  private async onTimeout() {
     if (!this.subscribed) {
       return;
     }
-    this.unsubscribe();
-    this.subscribe();
+    await this.unsubscribe();
+    await sleep(1000);
+    await this.subscribe();
   }
 
   private onData(data) {
@@ -33,27 +35,29 @@ export class RosTopic {
     if (!tmp) {
       return;
     }
+    this.dog.feed();
     const res = YAML.parse(tmp);
     this.emitter.emit('message', res);
   }
 
-  public subscribe() {
+  public async subscribe() {
     if (this.subscribeChildProcess) {
       return;
     }
     this.subscribed = true;
+    this.dog.init();
     this.subscribeChildProcess = spawn(`rostopic`, ['echo', this.topic]);
     this.subscribeChildProcess.stdout.on('data', this.onData.bind(this));
-    this.dog.init();
+    this.subscribeChildProcess.stderr.on('data', (buf) => console.log(buf.toString()));
   }
 
-  public unsubscribe() {
-    if (this.subscribeChildProcess) {
+  public async unsubscribe() {
+    if (!this.subscribeChildProcess) {
       return;
     }
     this.dog.stop();
     this.subscribed = false;
-    SIGKILL(this.subscribeChildProcess.pid);
+    await SIGKILL(this.subscribeChildProcess.pid);
     this.subscribeChildProcess = null;
   }
 
