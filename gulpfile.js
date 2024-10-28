@@ -1,4 +1,5 @@
 const gulp = require('gulp');
+// const babel = require('gulp-babel');
 const ts = require('gulp-typescript');
 const del = require('del');
 
@@ -19,7 +20,17 @@ gulp.task('es', function () {
   const tsProject = ts.createProject('tsconfig.pro.json', {
     module: 'ESNext',
   });
-  return tsProject.src().pipe(tsProject()).pipe(gulp.dest('es/'));
+  return (
+    tsProject
+      .src()
+      .pipe(tsProject())
+      // .pipe(
+      //   babel({
+      //     configFile: '../../.babelrc',
+      //   }),
+      // )
+      .pipe(gulp.dest('es/'))
+  );
 });
 
 gulp.task('declaration', function () {
