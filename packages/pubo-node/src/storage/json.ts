@@ -36,10 +36,6 @@ class Manager implements StorageInstance {
 
     if (global.GlobalEmitter) {
       global.GlobalEmitter.on('SIGINT', this.kill.bind(this));
-    } else {
-      process.on('SIGINT', () => {
-        this.kill().then(() => process.exit(0));
-      });
     }
   }
 
