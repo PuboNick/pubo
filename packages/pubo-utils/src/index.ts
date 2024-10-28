@@ -26,6 +26,6 @@ export {
   orderByDistance,
   getVectorTheta,
 } from './math/geometry';
+export { lower2camel } from './str';
 export { RegExpList } from './regexp-list';
 export { SensorDataFilter, StringSplit } from './filter/sensor';
-export { lower2camel } from './str';
