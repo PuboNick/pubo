@@ -84,7 +84,6 @@ class Manager implements StorageInstance {
         if (err) {
           reject(err);
         } else {
-          console.log('sync file');
           setTimeout(resolve, 100);
         }
       });
