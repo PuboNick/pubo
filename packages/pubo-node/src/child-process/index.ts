@@ -71,8 +71,8 @@ export const getProcessTree = async (pid: number, tree?: any) => {
     isRoot = true;
     tree = { pid, children: [] };
   }
-  const pids = await getProcessByPpid(pid);
-  for (const id of pids) {
+  const pidList = await getProcessByPpid(pid);
+  for (const id of pidList) {
     const item = { pid: id, children: [] };
     await getProcessTree(id, item);
     tree.children.push(item);
@@ -81,6 +81,7 @@ export const getProcessTree = async (pid: number, tree?: any) => {
     return tree;
   } else {
     tree = null;
+    return null;
   }
 };
 

@@ -42,6 +42,8 @@ interface PuboFileSystemInterface {
   open: (path: fs.PathLike, flags?: fs.OpenMode, mode?: fs.Mode | null) => Promise<number>;
 
   close: (fd: number) => Promise<void>;
+  mkdir: (path: fs.PathLike, options?: fs.MakeDirectoryOptions) => Promise<void>;
+  rm: (path: fs.PathLike) => Promise<void>;
 
   write: <TBuffer extends NodeJS.ArrayBufferView>(
     fd: number,
@@ -52,7 +54,7 @@ interface PuboFileSystemInterface {
   ) => Promise<void>;
 }
 
-const callbackToPromise = (fn): any => {
+const callback2promise = (fn): any => {
   return (...args) =>
     new Promise((resolve: any, reject) => {
       fn(...args, (err, ...rest) => {
@@ -69,12 +71,14 @@ const callbackToPromise = (fn): any => {
 };
 
 export const PuboFileSystem: PuboFileSystemInterface = {
-  read: callbackToPromise(fs.read),
-  readFile: callbackToPromise(fs.readFile),
-  writeFile: callbackToPromise(fs.writeFile),
-  readdir: callbackToPromise(fs.readdir),
-  open: callbackToPromise(fs.open),
-  close: callbackToPromise(fs.close),
-  write: callbackToPromise(fs.write),
-  stat: callbackToPromise(fs.stat),
+  read: callback2promise(fs.read),
+  readFile: callback2promise(fs.readFile),
+  writeFile: callback2promise(fs.writeFile),
+  readdir: callback2promise(fs.readdir),
+  open: callback2promise(fs.open),
+  close: callback2promise(fs.close),
+  write: callback2promise(fs.write),
+  stat: callback2promise(fs.stat),
+  mkdir: callback2promise(fs.mkdir),
+  rm: callback2promise(fs.rm),
 };

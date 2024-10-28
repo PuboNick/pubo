@@ -1,7 +1,8 @@
-import { readFileSync, writeFile, mkdirSync } from 'fs';
+import { readFileSync, writeFile, mkdirSync, writeFileSync } from 'fs';
 import { SyncQueue } from 'pubo-utils';
 import { v4 as uuid } from 'uuid';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const cluster = require('cluster');
 
 interface StorageInstance {
@@ -32,6 +33,19 @@ class Manager implements StorageInstance {
       worker = null;
     });
     this.restore();
+
+    if (global.GlobalEmitter) {
+      global.GlobalEmitter.on('SIGINT', this.kill.bind(this));
+    } else {
+      process.on('SIGINT', () => {
+        this.kill().then(() => process.exit(0));
+      });
+    }
+  }
+
+  // 进程退出时,同步文件
+  private async kill() {
+    await this.queue.push(() => this.syncFile());
   }
 
   private async onMessage(message, worker) {
@@ -51,20 +65,27 @@ class Manager implements StorageInstance {
     worker = null;
   }
 
-  private async sync() {
+  private sync() {
     if (this.queue.length > 0) {
       return;
     }
-    await this.queue.push(this._syncFile.bind(this));
+    this.queue.push(this._syncFile.bind(this));
   }
 
+  // 同步文件备份
+  private syncFile() {
+    writeFileSync(this.path, JSON.stringify(this._state));
+  }
+
+  // 异步文件备份
   private async _syncFile() {
     return new Promise((resolve, reject) => {
       writeFile(this.path, JSON.stringify(this._state), (err) => {
         if (err) {
           reject(err);
         } else {
-          resolve('');
+          console.log('sync file');
+          setTimeout(resolve, 100);
         }
       });
     });
@@ -89,7 +110,7 @@ class Manager implements StorageInstance {
 
   async setState(values) {
     this._state = values;
-    await this.sync();
+    this.sync();
   }
 }
 
@@ -120,7 +141,8 @@ class Worker implements StorageInstance {
     return new Promise((resolve) => {
       const uid = uuid();
       this.callback[uid] = (data) => resolve(data);
-      // @ts-ignore
+
+      //@ts-ignore
       process.send({ uid, type, payload, key: this.key });
 
       payload = null;
@@ -146,6 +168,7 @@ export interface JsonStorageOptions {
 
 export class JsonStorage {
   private readonly instance: StorageInstance;
+  private readonly queue = new SyncQueue();
 
   constructor(path: string, options: JsonStorageOptions = {}) {
     if (cluster.isPrimary) {
@@ -159,12 +182,12 @@ export class JsonStorage {
     }
   }
 
-  private async getState() {
-    return this.instance.getState();
+  private async getState(): Promise<any> {
+    return this.queue.push(this.instance.getState.bind(this.instance));
   }
 
   private async setState(state: any) {
-    return this.instance.setState(state);
+    return this.queue.push(() => this.instance.setState(state));
   }
 
   async get(key?: string) {
