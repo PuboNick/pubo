@@ -1,19 +1,19 @@
-export function throttle(cb, time: number) {
-  let t;
-  let onOff = true;
-  return (...args) => {
-    if (!t) {
-      t = setTimeout(() => {
-        clearTimeout(t);
-        onOff = true;
-        t = null;
-      }, time);
-    }
+import { SyncQueue } from '../queue';
+import { sleep } from '../sleep';
 
-    if (onOff) {
-      onOff = false;
-      cb(...args);
+export function throttle(cb, time: number) {
+  const queue = new SyncQueue();
+  let payload: any;
+
+  return (...args) => {
+    payload = args;
+    if (queue.length > 0) {
+      return;
     }
-    (args as any) = null;
+    return queue.push(async () => {
+      await sleep(time);
+      await cb(...payload);
+      payload = null;
+    });
   };
 }

@@ -6,7 +6,7 @@ module.exports = merge(common, {
   entry: './es/index.js',
   output: {
     filename: 'pubo-utils.js',
-    library: 'pubo-utils',
+    library: 'PuboUtils',
     path: path.resolve(__dirname, './dist'),
   },
 });
