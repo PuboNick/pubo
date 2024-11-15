@@ -1,5 +1,6 @@
 export { JsonStorage } from './storage/json';
-export { FtpClient, FtpClientPool, FtpConnectOptions, FtpFile } from './ftp-client';
+export { FtpClient, FtpClientPool } from './ftp-client';
+export type { FtpConnectOptions, FtpFile } from './ftp-client';
 export { createRpcClient, GrpcList } from './grpc';
 export {
   SIGKILL,
