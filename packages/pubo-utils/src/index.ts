@@ -2,7 +2,7 @@ export { debounce } from './debounce';
 export { hex2rgb } from './color/utils';
 export { Emitter } from './emitter';
 export { superFactory } from './factory';
-export { loop, waitFor } from './loop';
+export { loop, waitFor, retry } from './loop';
 export { SyncQueue } from './queue';
 export { random, randomRangeNum } from './random';
 export { sleep } from './sleep';
