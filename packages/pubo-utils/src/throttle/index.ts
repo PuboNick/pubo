@@ -3,7 +3,7 @@ import { sleep } from '../sleep';
 
 export function throttle(cb, time: number) {
   const queue = new SyncQueue();
-  let payload: any;
+  let payload: any = [];
 
   return (...args) => {
     payload = args;
@@ -13,7 +13,6 @@ export function throttle(cb, time: number) {
     return queue.push(async () => {
       await sleep(time);
       await cb(...payload);
-      payload = null;
     });
   };
 }
