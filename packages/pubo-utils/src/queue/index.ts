@@ -44,3 +44,28 @@ export class SyncQueue {
     return this.len;
   }
 }
+
+export const runAsyncTasks = async (list, j = 4) => {
+  let i = -1;
+  const t: any[] = [];
+
+  const run = async () => {
+    i += 1;
+    if (!list[i]) {
+      return;
+    }
+
+    try {
+      await list[i]();
+    } catch (err) {
+      console.log(err);
+    }
+    await run();
+  };
+
+  for (let n = 0; n < j; n += 1) {
+    t.push(run());
+  }
+
+  await Promise.all(t);
+};

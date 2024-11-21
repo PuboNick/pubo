@@ -3,7 +3,7 @@ export { hex2rgb } from './color/utils';
 export { Emitter } from './emitter';
 export { superFactory } from './factory';
 export { loop, waitFor, retry } from './loop';
-export { SyncQueue } from './queue';
+export { SyncQueue, runAsyncTasks } from './queue';
 export { random, randomRangeNum } from './random';
 export { sleep } from './sleep';
 export { throttle } from './throttle';
