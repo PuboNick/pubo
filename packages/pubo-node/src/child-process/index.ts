@@ -123,10 +123,15 @@ export async function SIGKILL(pid: number, signal = 2) {
   tmp.reverse();
   tree = null;
 
-  for (const item of tmp) {
-    await _SIGKILL(item, signal);
+  let success = true;
+  try {
+    for (const item of tmp) {
+      await _SIGKILL(item, signal);
+    }
+  } catch (err) {
+    success = false;
   }
-  return 'success';
+  return success;
 }
 
 // 子进程心跳包
