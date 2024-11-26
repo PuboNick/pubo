@@ -10,6 +10,7 @@ export {
   getProcessByPpid,
   getProcessCpuUseByPid,
   getProcessCommandByPid,
+  getPidByPort,
   heartbeat,
 } from './child-process';
 export { isPortAvailable } from './utils';

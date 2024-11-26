@@ -14,6 +14,45 @@ export function getProcessName(pid): Promise<string> {
   });
 }
 
+// 根据端口号获取进程名称
+export async function getPidByPort(port) {
+  if (!port) {
+    return '';
+  }
+  if (process.platform === 'win32') {
+    return new Promise((resolve, reject) => {
+      exec(`netstat -ano | findstr "${port}"`, (error, stdout, stderr) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        const arr = stdout.split('\n');
+        if (!arr[0]) {
+          resolve('');
+          return;
+        }
+        const tmp = arr[0].split(' ');
+        const res = tmp.pop();
+        resolve(res);
+      });
+    });
+  }
+
+  return new Promise((resolve, reject) => {
+    exec(`lsof -i:${port} | awk '{print $2}'`, (err, stdout) => {
+      if (err) {
+        reject(err);
+      } else {
+        let res = stdout.split('\n')[1];
+        if (res) {
+          res = res.trim();
+        }
+        resolve(res);
+      }
+    });
+  });
+}
+
 // 获取进程 cpu 使用率
 export function getProcessCpuUseByPid(pid: number): Promise<number> {
   return new Promise((resolve) => {
