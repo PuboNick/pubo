@@ -8,7 +8,7 @@ export function getProcessName(pid): Promise<string> {
       if (err) {
         reject(err);
       } else {
-        resolve(data);
+        resolve(data.toString().split(':')[1]?.trim());
       }
     });
   });
@@ -117,6 +117,7 @@ export async function SIGKILL(pid: number, signal = 2) {
   }
 
   let tree = await getProcessTree(pid);
+
   // 获取所有进程PID,从叶到根
   const tmp = [tree.pid];
   flatProcessTree(tree, tmp);
@@ -124,13 +125,14 @@ export async function SIGKILL(pid: number, signal = 2) {
   tree = null;
 
   let success = true;
-  try {
-    for (const item of tmp) {
+  for (const item of tmp) {
+    try {
       await _SIGKILL(item, signal);
+    } catch (err) {
+      success = false;
     }
-  } catch (err) {
-    success = false;
   }
+
   return success;
 }
 
