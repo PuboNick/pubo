@@ -14,7 +14,7 @@ export function getProcessName(pid): Promise<string> {
   });
 }
 
-// 根据端口号获取进程名称
+// 根据端口号获取进程PID
 export async function getPidByPort(port) {
   if (!port) {
     return '';
@@ -66,7 +66,7 @@ export function getProcessCpuUseByPid(pid: number): Promise<number> {
   });
 }
 
-// 获取进程 command 使用率
+// 获取进程 command
 export function getProcessCommandByPid(pid: number): Promise<string> {
   return new Promise((resolve) => {
     exec(`ps -p ${pid} -o command=`, (err, stdout) => {
@@ -148,6 +148,7 @@ const flatProcessTree = (tree: any, tmp: any[]) => {
   (tmp as any) = null;
 };
 
+// 杀死进程以及子进程
 export async function SIGKILL(pid: number, signal = 2) {
   if (process.platform === 'win32') {
     return new Promise((resolve) => {
@@ -163,16 +164,17 @@ export async function SIGKILL(pid: number, signal = 2) {
   tmp.reverse();
   tree = null;
 
-  let success = true;
+  const res = { success: true, error: null };
   for (const item of tmp) {
     try {
       await _SIGKILL(item, signal);
     } catch (err) {
-      success = false;
+      res.error = err;
+      res.success = false;
     }
   }
 
-  return success;
+  return res;
 }
 
 // 子进程心跳包
@@ -210,6 +212,33 @@ export const getAudioCards = (filter = ''): Promise<{ text: string; index: strin
           .map((item) => parseAudioCard(item));
 
         resolve(arr);
+      }
+    });
+  });
+};
+
+const dic = ['fileSystem', 'size', 'used', 'avail', 'use%', 'mountedOn'];
+
+const parser = (str) => {
+  return str
+    .split('\n')
+    .filter((item) => item)
+    .map((item) => item.split(' ').filter((s) => !!s))
+    .map((item) => {
+      const res = {};
+      dic.forEach((key, i) => (res[key] = item[i]));
+      return res;
+    })
+    .map((item) => ({ ...item, total: parseFloat(item.size), percentage: parseFloat(item['use%']) }));
+};
+
+export const getDiskUsage = async () => {
+  return new Promise((resolve) => {
+    exec('df -h | grep G', (err, stdout) => {
+      if (err) {
+        resolve([]);
+      } else {
+        resolve(parser(stdout.toString()));
       }
     });
   });

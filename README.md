@@ -80,6 +80,25 @@ const dog = new WatchDog({ limit: 10 /** 单位为 s*/, onTimeout() { console.lo
 loop(async () => { dog.feed(); }, 9000);
 ```
 
+### SensorDataFilter
+数据过滤器，可以过滤跳变数据和异常数据
+```javascript
+const sf = new SensorDataFilter({size: 5, step: 5 });
+const val = sf.filter(10);
+```
+
+### StringSplit
+分割字符串，用于分割不连续的字符串流，例如：1. abc|d 2.ef|ghi|jkl 3.|mno，返回值为数组
+```javascript
+const s = new StringSplit('|');
+let results = s.split('abc|d');
+console.log(results);
+results = s.split('ef|ghi|jkl');
+console.log(results);
+results = s.split('|mno');
+console.log(results);
+```
+
 ## pubo-node
 ### FtpClient & FtpClientPool
 ftp 连接客户端工厂，需要传入一个ftp 驱动 https://github.com/mscdex/node-ftp, 一个 FtpClient 为一个连接，一个连接同时只能执行一个方法，FtpClientPool 为连接池，可以自动根据最大连接数配置自行管理连接实现同时执行多个查询

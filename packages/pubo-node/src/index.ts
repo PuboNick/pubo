@@ -12,6 +12,7 @@ export {
   getProcessCommandByPid,
   getPidByPort,
   heartbeat,
+  getDiskUsage,
 } from './child-process';
 export { isPortAvailable } from './utils';
 export { getWifiName, getNetworks } from './utils/network';
