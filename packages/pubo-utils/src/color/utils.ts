@@ -50,3 +50,73 @@ export class ColorUtils {
     return this.hex;
   }
 }
+
+export class LinearColor {
+  private readonly base = [255, 0, 0];
+  private intensity = 1;
+  private readonly min: number;
+  private readonly max: number;
+
+  constructor({ base = [255, 0, 0], intensity = 1 }: { base?: [number, number, number]; intensity?: number } = {}) {
+    this.base = base;
+    this.intensity = intensity;
+    if (this.intensity < 1) {
+      this.intensity = 1;
+    }
+    this.min = this.base[1];
+    this.max = this.base[0];
+
+    if (Math.abs(this.min - this.max) < 1) {
+      this.min = 0;
+      this.max = 255;
+    }
+  }
+
+  getColor(value: number) {
+    if (value < 0) {
+      return this.base;
+    }
+
+    let r = this.base[0];
+    let g = this.base[1];
+    let b = this.base[2];
+
+    let n = value * this.intensity;
+    g = this.base[1] + n;
+    if (g < this.max) {
+      return [r, g, b];
+    }
+    n = g - this.max;
+    g = this.max;
+    r = this.base[0] - n;
+    if (r > this.min) {
+      return [r, g, b];
+    }
+    n = this.min - r;
+    r = this.min;
+    b = this.base[2] + n;
+    if (b < this.max) {
+      return [r, g, b];
+    }
+    n = b - this.max;
+    b = this.max;
+    g = g - n;
+    if (g > this.min) {
+      return [r, g, b];
+    }
+    n = this.min - g;
+    g = this.min;
+    r = r + n;
+    if (r < this.max) {
+      return [r, g, b];
+    }
+    n = r - this.max;
+    r = this.max;
+    b = b - n;
+    if (b > this.min) {
+      return [r, g, b];
+    }
+    b = this.min;
+    return [r, g, b];
+  }
+}

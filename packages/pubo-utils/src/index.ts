@@ -1,5 +1,5 @@
 export { debounce } from './debounce';
-export { hex2rgb } from './color/utils';
+export { hex2rgb, LinearColor, ColorUtils } from './color/utils';
 export { Emitter } from './emitter';
 export { superFactory } from './factory';
 export { loop, waitFor, retry } from './loop';

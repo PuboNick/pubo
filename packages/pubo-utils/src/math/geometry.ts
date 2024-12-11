@@ -57,7 +57,10 @@ export function getCenter(list: Point2D[] | [number, number][]): Point2D {
 }
 
 // 2D旋转
-export function getRotate(data: Vector2D, theta: number): Vector2D {
+export function getRotate(data: Vector2D, theta: number, isDeg?: boolean): Vector2D {
+  if (isDeg) {
+    theta = radians(theta);
+  }
   const x = Math.cos(theta) * data[0] - Math.sin(theta) * data[1];
   const y = Math.sin(theta) * data[0] + Math.cos(theta) * data[1];
   return [x, y];
