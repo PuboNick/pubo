@@ -96,8 +96,9 @@ class Manager implements StorageInstance {
       this._state = JSON.parse(buf.toString());
     } catch (err) {
       const str = process.platform === 'win32' ? '\\' : '/';
-      if (str) {
-        mkdirSync(this.path.split(str).slice(0, -1).join(str), { recursive: true });
+      const folder = this.path.split(str).slice(0, -1).join(str);
+      if (folder) {
+        mkdirSync(folder, { recursive: true });
       }
       this.setState(this.defaultState ?? {});
     }

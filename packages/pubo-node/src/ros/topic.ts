@@ -22,9 +22,6 @@ export class RosTopic {
   }
 
   private async onTimeout() {
-    if (!this.subscribed) {
-      return;
-    }
     await this.unsubscribe();
     await sleep(1000);
     await this.subscribe();
