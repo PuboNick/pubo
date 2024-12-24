@@ -10,10 +10,10 @@ export {
   getProcessByPpid,
   getProcessCpuUseByPid,
   getProcessCommandByPid,
+  getProcessList,
   getPidByPort,
   heartbeat,
   getDiskUsage,
-  getProcessList,
 } from './child-process';
 export { isPortAvailable } from './utils';
 export { getWifiName, getNetworks } from './utils/network';
