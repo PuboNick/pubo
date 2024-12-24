@@ -152,7 +152,7 @@ const flatProcessTree = (tree: any, tmp: any[]) => {
 };
 
 // 获取所有进程PID,从叶到根
-const getProcessList = async (pid) => {
+export const getProcessList = async (pid) => {
   let tree = await getProcessTree(pid);
   const tmp: number[] = [];
   if (!tree.pid) {
