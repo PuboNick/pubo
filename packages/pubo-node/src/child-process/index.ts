@@ -88,16 +88,19 @@ export async function isProcessDied(pid) {
 // 获取子进程
 export function getProcessByPpid(pid: number): Promise<number[]> {
   return new Promise((resolve) => {
-    exec(`ps -o pid --no-headers --ppid ${pid}`, (err, stdout) => {
+    let child: any = exec(`ps -o pid --no-headers --ppid ${pid}`, (err, stdout) => {
       if (err) {
         resolve([]);
+        child = null;
       } else {
         resolve(
           stdout
             .split('\n')
             .filter((item) => !!item)
-            .map((item) => parseFloat(item.trim())),
+            .map((item) => parseFloat(item.trim()))
+            .filter((item) => item !== child.pid),
         );
+        child = null;
       }
     });
   });
@@ -148,26 +151,32 @@ const flatProcessTree = (tree: any, tmp: any[]) => {
   (tmp as any) = null;
 };
 
+// 获取所有进程PID,从叶到根
+const getProcessList = async (pid) => {
+  let tree = await getProcessTree(pid);
+  const tmp: number[] = [];
+  if (!tree.pid) {
+    return tmp;
+  }
+  tmp.push(tree.pid);
+  flatProcessTree(tree, tmp);
+  tmp.reverse();
+  tree = null;
+  return tmp;
+};
 // 杀死进程以及子进程
-export async function SIGKILL(pid: number, signal = 2) {
+export async function SIGKILL(pid: number, signal = 2, times = 1) {
   if (process.platform === 'win32') {
     return new Promise((resolve) => {
       exec(`taskkill /pid ${pid} /T /F`, resolve);
     });
   }
 
-  let tree = await getProcessTree(pid);
-
-  // 获取所有进程PID,从叶到根
-  const tmp = [tree.pid];
-  flatProcessTree(tree, tmp);
-  tmp.reverse();
-  tree = null;
-
+  const tmp = await getProcessList(pid);
   const res = { success: true, error: null };
   for (const item of tmp) {
     try {
-      await _SIGKILL(item, signal);
+      await _SIGKILL(item, signal, times);
     } catch (err) {
       res.error = err;
       res.success = false;
