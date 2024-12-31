@@ -29,4 +29,4 @@ export {
 export { lower2camel, fixNum } from './str';
 export { RegExpList } from './regexp-list';
 export { SensorDataFilter, StringSplit } from './filter/sensor';
-export { cloneDeep, getTreeItem, searchTree, flatTree } from './object';
+export { cloneDeep, getTreeItem, searchTree, flatTree, filterTree } from './object';

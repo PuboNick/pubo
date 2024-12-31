@@ -83,3 +83,24 @@ export const flatTree = (tree: any, key: string = 'children', indexes: number[] 
   arr.forEach((item, i: number) => flatTree(item, key, [...indexes, i], tmp));
   return tmp;
 };
+
+export const filterTree = (tree: any, cb: (item: any) => boolean, key: string = 'children') => {
+  const tmp: any[] = [];
+  let arr: any = [];
+  if (Array.isArray(tree[key])) {
+    arr = tree[key];
+  } else if (Array.isArray(tree)) {
+    arr = tree;
+  }
+
+  arr.forEach((item: any) => {
+    if (item[key]) {
+      item[key] = filterTree(item[key], cb);
+    }
+    if (item[key]?.length > 0 || cb(item)) {
+      tmp.push(item);
+    }
+  });
+
+  return tmp;
+};
