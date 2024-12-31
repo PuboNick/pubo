@@ -26,7 +26,7 @@ export {
   orderByDistance,
   getVectorTheta,
 } from './math/geometry';
-export { lower2camel } from './str';
+export { lower2camel, fixNum } from './str';
 export { RegExpList } from './regexp-list';
 export { SensorDataFilter, StringSplit } from './filter/sensor';
-export { cloneDeep } from './object';
+export { cloneDeep, getTreeItem, searchTree, flatTree } from './object';
