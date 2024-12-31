@@ -53,6 +53,10 @@ export function searchTree(tree: any, cb: (item: any) => boolean, key: string = 
       if (Array.isArray(item[key])) {
         tmp.push(i);
         each(item[key]);
+        if (bool) {
+          break;
+        }
+        tmp.pop();
       }
     }
   };
