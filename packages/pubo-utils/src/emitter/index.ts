@@ -66,7 +66,11 @@ export class Emitter implements EmitterType {
     if (Array.isArray(this.state[event])) {
       for (const func of this.state[event]) {
         if (typeof func === 'function') {
-          await func(payload);
+          try {
+            await func(payload);
+          } catch (err) {
+            console.log(err);
+          }
         }
       }
     }
