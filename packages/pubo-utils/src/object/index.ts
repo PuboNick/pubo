@@ -1,27 +1,22 @@
 export function cloneDeep(data, hash = new WeakMap()) {
   if (typeof data !== 'object' || data === null) {
     return data;
-  }
-  if (hash.has(data)) {
+  } else if (hash.has(data)) {
     return hash.get(data);
+  } else if (Array.isArray(data)) {
+    return data.map((item) => cloneDeep(item, hash));
+  } else if (data instanceof Set) {
+    return new Set([...data]);
+  } else if (data instanceof Map) {
+    return new Map([...data]);
+  } else {
+    const tmp = {};
+    hash.set(data, data);
+    Object.keys(data).forEach((key) => {
+      tmp[key] = cloneDeep(data[key], hash);
+    });
+    return tmp;
   }
-  const tmp = {};
-  Object.keys(data).forEach((key) => {
-    const value = data[key];
-    if (typeof value !== 'object' || value === null) {
-      tmp[key] = value;
-    } else if (Array.isArray(value)) {
-      tmp[key] = value.map((item) => cloneDeep(item, hash));
-    } else if (value instanceof Set) {
-      tmp[key] = new Set([...value]);
-    } else if (value instanceof Map) {
-      tmp[key] = new Map([...value]);
-    } else {
-      hash.set(data, data);
-      tmp[key] = cloneDeep(value, hash);
-    }
-  });
-  return tmp;
 }
 
 export function getTreeItem(tree: any, indexes: number[]) {
