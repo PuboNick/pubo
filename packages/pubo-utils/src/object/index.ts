@@ -1,21 +1,32 @@
-export function cloneDeep(data, hash = new WeakMap()) {
+export function cloneDeep(data: any, hash = new WeakMap()): any {
   if (typeof data !== 'object' || data === null) {
     return data;
   } else if (hash.has(data)) {
     return hash.get(data);
   } else if (Array.isArray(data)) {
-    return data.map((item) => cloneDeep(item, hash));
+    const clone = data.map((item) => cloneDeep(item, hash));
+    hash.set(data, clone);
+    return clone;
   } else if (data instanceof Set) {
-    return new Set([...data]);
+    const clone = new Set([...data].map((item) => cloneDeep(item, hash)));
+    hash.set(data, clone);
+    return clone;
   } else if (data instanceof Map) {
-    return new Map([...data]);
+    const clone = new Map();
+    for (const [key, value] of data.entries()) {
+      clone.set(cloneDeep(key, hash), cloneDeep(value, hash));
+    }
+    hash.set(data, clone);
+    return clone;
   } else {
-    const tmp = {};
-    hash.set(data, data);
-    Object.keys(data).forEach((key) => {
-      tmp[key] = cloneDeep(data[key], hash);
-    });
-    return tmp;
+    const clone: Record<string, any> = {};
+    hash.set(data, clone);
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        clone[key] = cloneDeep(data[key], hash);
+      }
+    }
+    return clone;
   }
 }
 
