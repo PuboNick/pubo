@@ -88,27 +88,27 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
   });
 };
 
-export const retry = (
+export const retry = async (
   action: any,
   { times = 5, interval = 1000 }: { times: number; interval: number } = { times: 5, interval: 1000 },
 ) => {
   let count = 1;
-  const fn = async (...args) => {
+  const fn = async () => {
     let result;
     if (count > times) {
       throw new Error('retry times exceed');
     }
     try {
-      result = await action(...args);
+      result = await action();
       return result;
     } catch (err) {
       console.log(`action error, times ${count}`);
       console.log(err);
       await sleep(interval);
       count += 1;
-      return fn(...args);
+      await fn();
     }
   };
 
-  return fn;
+  await fn();
 };
