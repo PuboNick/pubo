@@ -18,7 +18,7 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "gitHead": "a368d57fee297e87ede4bb6bfdeda0ad4bbfd474",
+  "gitHead": "1fd3582ac2bf243ddd97fed932f6274f3b15e484",
   "devDependencies": {
     "del": "^5.1.0",
     "eslint": "^8.42.0",
