@@ -28,6 +28,7 @@ export class SensorDataFilter {
     this.step = step;
     this.min = min;
     this.max = max;
+    this.old = this.min;
   }
 
   filter(n: number) {
@@ -68,6 +69,8 @@ export class SensorDataFilter {
       if (this.count > dic[res]) {
         this.tmp.length = 0;
         this.tmp.push(n);
+        this.count = 0;
+        this.value = NaN;
         return n;
       }
     } else {
@@ -97,7 +100,7 @@ export class SensorDataFilter {
         a[item] += 1;
       }
 
-      if (a[item] > max) {
+      if (a[item] >= max) {
         max = a[item];
         res = item;
       }
