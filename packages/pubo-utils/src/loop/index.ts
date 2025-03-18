@@ -10,28 +10,18 @@ import { sleep } from '../sleep';
 
 export const loop = (cb: () => Promise<void>, time: number) => {
   let onOff = true;
-  let stop = () => {
-    onOff = false;
-  };
+  let stop = () => (onOff = false);
 
-  let fn: any = async () => {
-    try {
-      await cb();
-    } catch (err) {
-      console.log(err);
+  (async () => {
+    while (onOff) {
+      try {
+        await cb();
+      } catch (err) {
+        console.log(err);
+      }
+      await sleep(time);
     }
-    await sleep(time);
-    if (onOff) {
-      fn();
-    } else {
-      fn = null;
-      (cb as any) = null;
-      (stop as any) = null;
-      (onOff as any) = null;
-      (time as any) = null;
-    }
-  };
-  fn();
+  })();
 
   return stop;
 };
@@ -112,3 +102,56 @@ export const retry = async (
 
   await fn();
 };
+
+export class RetryPlus {
+  times: number;
+  interval: number;
+  action: any;
+
+  private count = 1;
+  private args: any[] = [];
+  private result: any;
+  private canceled: boolean = false;
+
+  constructor(
+    action,
+    { times = 5, interval = 1000 }: { times: number; interval: number } = { times: 5, interval: 1000 },
+  ) {
+    this.interval = interval;
+    this.times = times;
+    this.action = action;
+  }
+
+  private async _run() {
+    if (this.canceled) {
+      throw new Error('retry canceled');
+    }
+    if (this.count > this.times) {
+      throw new Error('retry times exceed');
+    }
+    try {
+      this.result = await this.action(...this.args);
+    } catch (err) {
+      console.log(`action error, times ${this.count}`);
+      console.log(err);
+      await sleep(this.interval);
+      this.count += 1;
+      await this._run();
+    }
+  }
+
+  async run(...args: any[]) {
+    this.canceled = false;
+    this.result = null;
+    this.count = 1;
+    this.args = args;
+    await this._run();
+    this.args = [];
+    this.count = 1;
+    return this.result;
+  }
+
+  async cancel() {
+    this.canceled = true;
+  }
+}
