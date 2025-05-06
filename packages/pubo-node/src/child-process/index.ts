@@ -3,6 +3,22 @@ import { loop, waitFor } from 'pubo-utils';
 
 // 获取进程名称
 export function getProcessName(pid): Promise<string> {
+  if (process.platform === 'win32') {
+    // 使用tasklist命令获取进程信息
+    return new Promise((resolve, reject) => {
+      exec(`tasklist /fi "PID eq ${pid}" /fo csv /nh`, (err, stdout) => {
+        if (err) {
+          reject(err);
+        } else {
+          // 解析CSV格式的输出
+          const match = stdout.match(/^"(.+?)"/);
+          if (match && match[1]) {
+            resolve(match[1]);
+          }
+        }
+      });
+    });
+  }
   return new Promise((resolve, reject) => {
     exec(`grep "Name:" /proc/${pid}/status`, (err, data) => {
       if (err) {
@@ -21,7 +37,7 @@ export async function getPidByPort(port) {
   }
   if (process.platform === 'win32') {
     return new Promise((resolve, reject) => {
-      exec(`netstat -ano | findstr "${port}"`, (error, stdout, stderr) => {
+      exec(`netstat -ano | findstr "${port}"`, (error, stdout) => {
         if (error) {
           reject(error);
           return;
@@ -80,7 +96,7 @@ export function getProcessCommandByPid(pid: number): Promise<string> {
 }
 
 // 判断进程是否死亡
-export async function isProcessDied(pid) {
+export async function isProcessDied(pid: number) {
   const used = await getProcessCpuUseByPid(pid);
   return used < 0;
 }
@@ -135,7 +151,10 @@ async function _SIGKILL(pid, signal = 2, times = 1) {
 
   exec(`kill -${signal} ${pid}`);
   try {
-    await waitFor(async () => isProcessDied(pid), { checkTime: 100, timeout: 4000 });
+    await waitFor(async () => isProcessDied(pid), {
+      checkTime: 100,
+      timeout: 4000,
+    });
   } catch (err) {
     await _SIGKILL(pid, 9, times + 1);
   }
@@ -164,6 +183,7 @@ export const getProcessList = async (pid) => {
   tree = null;
   return tmp;
 };
+
 // 杀死进程以及子进程
 export async function SIGKILL(pid: number, signal = 2, times = 1) {
   if (process.platform === 'win32') {
@@ -209,6 +229,9 @@ const parseAudioCard = (v: string) => {
 };
 
 export const getAudioCards = (filter = ''): Promise<{ text: string; index: string }[]> => {
+  if (process.platform === 'win32') {
+    return Promise.resolve([]);
+  }
   return new Promise((resolve, reject) => {
     exec(`arecord -l`, (err, stdout) => {
       if (err) {
@@ -238,7 +261,11 @@ const parser = (str) => {
       dic.forEach((key, i) => (res[key] = item[i]));
       return res;
     })
-    .map((item) => ({ ...item, total: parseFloat(item.size), percentage: parseFloat(item['use%']) }));
+    .map((item) => ({
+      ...item,
+      total: parseFloat(item.size),
+      percentage: parseFloat(item['use%']),
+    }));
 };
 
 export const getDiskUsage = async () => {
