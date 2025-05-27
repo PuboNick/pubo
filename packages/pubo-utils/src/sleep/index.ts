@@ -14,3 +14,29 @@ export const sleep = async (time: number) => {
     }, time);
   });
 };
+
+
+export const timeout = async (cb, time = 10000): Promise<any> => {
+  return new Promise(async (resolve, reject) => {
+    let ended = false;
+    const t = setTimeout(() => {
+      ended = true;
+      reject(new Error('Timeout'));
+    }, time);
+    let result;
+    try {
+      result = await cb();
+      clearTimeout(t);
+    } catch (err) {
+      console.log(err);
+      clearTimeout(t);
+      if (!ended) {
+        reject(err);
+      }
+    }
+
+    if (!ended) {
+      resolve(result);
+    }
+  });
+};

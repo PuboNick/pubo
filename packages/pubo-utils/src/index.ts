@@ -5,7 +5,7 @@ export { superFactory } from './factory';
 export { loop, retry, waitFor, RetryPlus } from './loop';
 export { SyncQueue, runAsyncTasks } from './queue';
 export { random, randomRangeNum } from './random';
-export { sleep } from './sleep';
+export { sleep, timeout } from './sleep';
 export { throttle } from './throttle';
 export { ContinuousTrigger } from './trigger';
 export * as Base64Utils from './base64';
