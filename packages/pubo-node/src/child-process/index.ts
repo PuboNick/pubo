@@ -14,6 +14,8 @@ export function getProcessName(pid): Promise<string> {
           const match = stdout.match(/^"(.+?)"/);
           if (match && match[1]) {
             resolve(match[1]);
+          } else {
+            reject('process not found');
           }
         }
       });
@@ -249,7 +251,7 @@ export const getAudioCards = (filter = ''): Promise<{ text: string; index: strin
   });
 };
 
-const dic = ['fileSystem', 'size', 'used', 'avail', 'use%', 'mountedOn'];
+const dic = ['fileSystem', 'size', 'used', 'avail', 'usedPercent', 'mounted'];
 
 const parser = (str) => {
   return str
