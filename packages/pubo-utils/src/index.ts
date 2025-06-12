@@ -31,3 +31,4 @@ export { RegExpList } from './regexp-list';
 export { SensorDataFilter, StringSplit } from './filter/sensor';
 export { cloneDeep, getTreeItem, searchTree, flatTree, filterTree } from './object';
 export * as UTM from './math/utm';
+export { BufferSplit } from './buf';
