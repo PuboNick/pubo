@@ -1,6 +1,6 @@
 export { debounce } from './debounce';
 export { hex2rgb, LinearColor, ColorUtils } from './color/utils';
-export { Emitter } from './emitter';
+export { Emitter, CacheEmitter } from './emitter';
 export { superFactory } from './factory';
 export { loop, retry, waitFor, RetryPlus } from './loop';
 export { SyncQueue, runAsyncTasks } from './queue';
