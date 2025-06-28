@@ -1,6 +1,6 @@
 {
   "name": "pubo-node",
-  "version": "1.0.187",
+  "version": "1.0.188",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "sideEffects": false,
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@types/node": "^17.0.25",
-    "pubo-utils": "^1.0.187",
+    "pubo-utils": "^1.0.188",
     "yaml": "^2.5.1"
   },
   "gitHead": "2f1b8fdc646e10edcd984d2123699569df265829",
