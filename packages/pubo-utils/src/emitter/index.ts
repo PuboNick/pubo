@@ -12,18 +12,19 @@ interface EmitterType {
 
 export class Emitter implements EmitterType {
   private state: any = {};
-  private ids: any = {};
+  ids: any = {};
 
   on(event: string, func: any) {
     if (!this.state[event]) {
-      this.state[event] = [];
+      this.state[event] = {};
     }
     if (typeof func !== 'function') {
       throw new Error('第二个参数必须为function!');
     }
-    const index = this.state[event].push(func) - 1;
-    const key = random(40);
-    this.ids[key] = { event, index };
+
+    const key = `${random(40)}_${new Date().valueOf()}`;
+    this.state[event][key] = func;
+    this.ids[key] = event;
     return key;
   }
 
@@ -32,29 +33,30 @@ export class Emitter implements EmitterType {
       this.clear();
       return;
     }
-    const { event, index } = this.ids[id] || {};
+
+    const event = this.ids[id];
     if (!event) {
       return;
     }
-    if (!Array.isArray(this.state[event])) {
+    if (!this.state[event]) {
       return;
     }
-    this.state[event].splice(index, 1);
+    delete this.state[event][id];
+    if (Object.keys(this.state[event]).length === 0) {
+      delete this.state[event];
+    }
     delete this.ids[id];
-    Object.keys(this.ids).forEach((key) => {
-      if (this.ids[key].event === event && this.ids[key].index > index) {
-        this.ids[key].index = this.ids[key].index - 1;
-      }
-    });
   }
 
   clear() {
-    this.state.length = 0;
+    this.state = {};
+    this.ids = {};
   }
 
   emit(event: string, payload?: any) {
-    if (Array.isArray(this.state[event])) {
-      for (const func of this.state[event]) {
+    if (this.state[event]) {
+      for (const key of Object.keys(this.state[event])) {
+        const func = this.state[event][key];
         if (typeof func === 'function') {
           func(payload);
         }
@@ -63,8 +65,9 @@ export class Emitter implements EmitterType {
   }
 
   async emitSync(event: string, payload?: any) {
-    if (Array.isArray(this.state[event])) {
-      for (const func of this.state[event]) {
+    if (this.state[event]) {
+      for (const key of Object.keys(this.state[event])) {
+        const func = this.state[event][key];
         if (typeof func === 'function') {
           try {
             await func(payload);
