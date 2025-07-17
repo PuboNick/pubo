@@ -21,7 +21,7 @@
   "dependencies": {
     "pubo-utils": "^1.0.188"
   },
-  "gitHead": "2f1b8fdc646e10edcd984d2123699569df265829",
+  "gitHead": "e9cc86b3bbc51b6038b83e37e0fbf4d4d2ad8c10",
   "devDependencies": {
     "del": "^5.1.0",
     "eslint": "^8.42.0",
