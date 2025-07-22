@@ -21,7 +21,7 @@
     "pubo-utils": "^1.0.191",
     "yaml": "^2.5.1"
   },
-  "gitHead": "acb7489ef4422e130a741aca42b0ecb20cc0b706",
+  "gitHead": "37ba09303855056e49fd67f76b3137425ecc964e",
   "devDependencies": {
     "del": "^5.1.0",
     "eslint": "^8.42.0",
