@@ -114,3 +114,13 @@ export const filterTree = (tree: any, cb: (item: any) => boolean, key: string = 
 
   return tmp;
 };
+
+export const reflection = (obj: any): any => {
+  const res: any = {};
+
+  for (const key of Object.keys(obj)) {
+    res[obj[key]] = key;
+  }
+
+  return res;
+};
