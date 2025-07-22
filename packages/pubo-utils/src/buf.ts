@@ -1,6 +1,6 @@
 export class BufferSplit {
-  private c: Buffer;
   private cache = Buffer.alloc(0);
+  private c: Buffer;
 
   constructor(buf: Buffer) {
     this.c = buf;
