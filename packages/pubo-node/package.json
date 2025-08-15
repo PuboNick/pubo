@@ -1,6 +1,6 @@
 {
   "name": "pubo-node",
-  "version": "1.0.192",
+  "version": "1.0.193",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "sideEffects": false,
