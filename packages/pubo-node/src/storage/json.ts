@@ -1,5 +1,5 @@
 import { readFileSync, writeFile, mkdirSync, writeFileSync } from 'fs';
-import { SyncQueue } from 'pubo-utils';
+import { cloneDeep, SyncQueue } from 'pubo-utils';
 import { v4 as uuid } from 'uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -105,7 +105,7 @@ class Manager implements StorageInstance {
   }
 
   async getState() {
-    return this._state;
+    return cloneDeep(this._state);
   }
 
   async setState(values) {
