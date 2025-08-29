@@ -155,3 +155,45 @@ export class RetryPlus {
     this.canceled = true;
   }
 }
+
+export interface RemoteControlOptions {
+  start: (payload?: any) => void;
+  stop: (payload?: any) => void;
+  fps?: number;
+}
+
+export class RemoteControl {
+  private timeout: any;
+  private _start: (payload?: any) => void;
+  private _stop: (payload?: any) => void;
+  private readonly fps: number;
+  private payload: any;
+
+  constructor({ start, stop, fps = 5 }) {
+    this._start = start;
+    this._stop = stop;
+    this.fps = fps;
+  }
+
+  private send() {
+    if (!this.payload) return;
+    this._start(this.payload);
+  }
+
+  public control(payload: any) {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }
+    this.payload = payload;
+    this.send();
+    this.timeout = setTimeout(() => this.stop(), 1000 / this.fps);
+  }
+
+  public stop() {
+    this.payload = null;
+    clearTimeout(this.timeout);
+    this.timeout = null;
+    this._stop();
+  }
+}
