@@ -100,6 +100,7 @@ export function getProcessCommandByPid(pid: number): Promise<string> {
 // 判断进程是否死亡
 export async function isProcessDied(pid: number) {
   const used = await getProcessCpuUseByPid(pid);
+  // console.log(`pid: ${pid}, used: ${used}`);
   return used < 0;
 }
 
@@ -115,8 +116,8 @@ export function getProcessByPpid(pid: number): Promise<number[]> {
           stdout
             .split('\n')
             .filter((item) => !!item)
-            .map((item) => parseFloat(item.trim()))
-            .filter((item) => item !== child.pid),
+            .map((item) => parseInt(item.trim()))
+            .filter((item) => item !== child.pid && !isNaN(item)),
         );
         child = null;
       }
@@ -151,7 +152,7 @@ async function _SIGKILL(pid, signal = 2, times = 1) {
     throw new Error('SIGKILL 失败. times > 5');
   }
 
-  exec(`kill -${signal} ${pid}`);
+  await new Promise((resolve) => exec(`kill -${signal} ${pid}`, resolve));
   try {
     await waitFor(async () => isProcessDied(pid), {
       checkTime: 100,
