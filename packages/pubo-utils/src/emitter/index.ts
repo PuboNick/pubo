@@ -30,7 +30,6 @@ export class Emitter implements EmitterType {
 
   cancel(id?: string) {
     if (!id) {
-      this.clear();
       return;
     }
 
