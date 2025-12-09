@@ -15,8 +15,9 @@ export const sleep = async (time: number) => {
   });
 };
 
-
+// 超时异常
 export const timeout = async (cb, time = 10000): Promise<any> => {
+  // oxlint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     let ended = false;
     const t = setTimeout(() => {

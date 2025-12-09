@@ -32,3 +32,4 @@ export { SensorDataFilter, StringSplit } from './filter/sensor';
 export { cloneDeep, getTreeItem, searchTree, flatTree, filterTree, reflection } from './object';
 export * as UTM from './math/utm';
 export { BufferSplit } from './buf';
+export * as FP from './fp';
