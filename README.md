@@ -1,110 +1,111 @@
-### 主要模块：
-pubo-utils： 通用工具方法与平台无关，基本为纯函数；
+# Pubo 项目
 
-pubo-web：浏览器端方法；
+Pubo 是一个模块化的 TypeScript/JavaScript 工具库集合，提供跨平台（Node.js、浏览器）的实用工具、文件操作、网络通信等功能。项目采用 monorepo 结构，包含三个独立发布的包。
 
-pubo-node：nodejs 端方法。
+## 主要模块
 
-### 如何安装
+| 模块 | 描述 | 文档链接 |
+|------|------|----------|
+| **pubo-utils** | 通用工具库，提供函数式编程、异步控制、数据转换、几何计算等纯函数工具 | [详细文档](./packages/pubo-utils/README.md) |
+| **pubo-web** | 浏览器端工具库，提供脚本加载、文件操作、Web存储、WebSocket、DOM操作等前端专用工具 | [详细文档](./packages/pubo-web/README.md) |
+| **pubo-node** | Node.js 端工具库，提供文件存储、FTP客户端、gRPC客户端、进程管理、网络工具、ROS主题管理等后端功能 | [详细文档](./packages/pubo-node/README.md) |
 
-`$ npm install --save pubo-utils`
+## 安装
 
-`$ npm install --save pubo-web`
+每个包都可以独立安装：
 
-`$ npm install --save pubo-node`
+```bash
+# 安装通用工具库
+npm install --save pubo-utils
 
-## pubo-utils
-### SyncQueue
+# 安装浏览器端工具库
+npm install --save pubo-web
 
-```javascript
-// SyncQueue 异步队列，可以将异步函数加入执行队列依次执行
-import { SyncQueue } from 'pubo-utils';
-
-const queue = new SyncQueue();
-
-const run = (i) => {
-  return new Promise((resolve) => setTimeout(() => resolve(`hello ${i}`), 1000));
-};
-
-const test = async (i) => {
-  const res = await queue.push(() => run(i));
-  console.log(res);
-};
-
-// 输出结果: 间隔 1000ms 依次输出 1 2 3 4 5 6 7 8 9 10
-for (let i = 0; i < 10; i++) {
-  test(i);
-}
-```
-### sleep & loop & waitFor
-
-loop 为一个异步的死循环，可以通过返回值 stop 方法或回调函数参数 stop 方法终止循环，它是一个安全的循环方法，会等动作执行完成后再继续执行，所以循环间隔时间不是完全准确的
-
-sleep 是一个异步的等待函数
-
-waitFor 接收一个回调函数和一个查询间隔时间，当回调函数返回值为 true 时等待结束。
-
-```javascript
-(async () => {
-  let bool = false;
-  await sleep(1000);
-  loop(async () => { console.log('loop') }, 1000);
-  setTimeout(() => { bool = true }, 10000);
-  await waitFor(async () => bool, { checkTime: 1000, timeout: 30000 });
-  console.log('done');
-})()
+# 安装 Node.js 端工具库
+npm install --save pubo-node
 ```
 
-### Emitter
-一个简单的发布订阅器
+## 快速开始
+
+### 使用 pubo-utils
 
 ```javascript
-const emit = new Emitter();
-emit.on('hello', (msg) => console.log(msg));
-emit.emit('hello', 'hello world');
+import { sleep, debounce, cloneDeep } from 'pubo-utils';
+
+// 延迟执行
+await sleep(1000);
+
+// 防抖函数
+const debouncedFn = debounce(() => console.log('debounced'), 300);
+
+// 深拷贝对象
+const copied = cloneDeep({ a: 1, b: { c: 2 } });
 ```
 
-### ContinuousTrigger
-一个触发器，在短时间内连续触发 n 次后执行，一般用于传感器数据监测，防止跳变导致的误触
+### 使用 pubo-web
+
 ```javascript
-const trigger = new ContinuousTrigger({ cb() {console.log('done')}, resetTime: 5000, count: 10 });
-for (let i = 0; i < 20; i += 1) {
-  trigger.increment();
-}
+import { loadScript, WebStorage } from 'pubo-web';
+
+// 动态加载脚本
+await loadScript('https://example.com/library.js');
+
+// 使用本地存储
+const storage = new WebStorage('my-app');
+storage.set('key', 'value');
 ```
 
-### WatchDog
-一个简单的看门狗工具，如果再规定时间内没有喂狗则认为程序异常，执行回调函数,可用于数据采集，例如摄像头，如果异常可以执行重连函数
+### 使用 pubo-node
+
 ```javascript
-const dog = new WatchDog({ limit: 10 /** 单位为 s*/, onTimeout() { console.log('done') } });
-loop(async () => { dog.feed(); }, 9000);
+import { JsonStorage, createRpcClient } from 'pubo-node';
+
+// JSON 文件存储
+const storage = new JsonStorage('./data.json');
+await storage.set('user', { id: 1, name: 'John' });
+
+// gRPC 客户端
+const client = createRpcClient('localhost:50051', './proto/service.proto');
 ```
 
-### SensorDataFilter
-数据过滤器，可以过滤跳变数据和异常数据
-```javascript
-const sf = new SensorDataFilter({size: 5, step: 5 });
-const val = sf.filter(10);
+## 项目结构
+
+```
+pubo/
+├── packages/
+│   ├── pubo-utils/     # 通用工具库
+│   ├── pubo-web/       # 浏览器端工具库
+│   └── pubo-node/      # Node.js 端工具库
+├── package.json        # 根项目配置
+├── lerna.json          # Monorepo 管理配置
+└── README.md           # 本项目文档
 ```
 
-### StringSplit
-分割字符串，用于分割不连续的字符串流，例如：1. abc|d 2.ef|ghi|jkl 3.|mno，返回值为数组
-```javascript
-const s = new StringSplit('|');
-let results = s.split('abc|d');
-console.log(results);
-results = s.split('ef|ghi|jkl');
-console.log(results);
-results = s.split('|mno');
-console.log(results);
-```
+## 开发与贡献
 
-## pubo-node
-### FtpClient & FtpClientPool
-ftp 连接客户端工厂，需要传入一个ftp 驱动 https://github.com/mscdex/node-ftp, 一个 FtpClient 为一个连接，一个连接同时只能执行一个方法，FtpClientPool 为连接池，可以自动根据最大连接数配置自行管理连接实现同时执行多个查询
-```javascript
-import * as ftp from 'ftp';
+本项目使用 [Lerna](https://lerna.js.org/) 管理 monorepo，[TypeScript](https://www.typescriptlang.org/) 编写代码，[Jest](https://jestjs.io/) 进行测试。
 
-const pool = new FtpClientPool({ driver: ftp, user: '', password: '', host: '', port: '' });
-pool.get(path).then(buffer => console.log(buffer.toString()));
-```
+1. 克隆项目：
+   ```bash
+   git clone <repository-url>
+   cd pubo
+   ```
+
+2. 安装依赖：
+   ```bash
+   yarn install
+   ```
+
+3. 构建所有包：
+   ```bash
+   yarn build
+   ```
+
+4. 运行测试：
+   ```bash
+   yarn test
+   ```
+
+## 许可证
+
+MIT License - 详见 [LICENSE.md](./LICENSE.md)

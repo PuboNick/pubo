@@ -116,4 +116,62 @@ export class PProcessLinux implements PProcess {
 
     return res;
   }
+
+  async getDiskUsage() {
+    return new Promise<any>((resolve) => {
+      exec('df -h | grep G', (err, stdout) => {
+        if (err) {
+          resolve([]);
+        } else {
+          resolve(parser(stdout.toString()));
+        }
+      });
+    });
+  }
+
+  getAudioCards(filter = ''): Promise<{ text: string; index: string }[]> {
+    return new Promise((resolve, reject) => {
+      exec(`arecord -l`, (err, stdout) => {
+        if (err) {
+          reject(err);
+        } else {
+          const arr = stdout
+            .toString()
+            .split('\n')
+            .filter((item) => item.includes('card') && (filter ? item.includes(filter) : true))
+            .map((item) => parseAudioCard(item));
+
+          resolve(arr);
+        }
+      });
+    });
+  }
 }
+
+const parseAudioCard = (v: string) => {
+  let card: any = /card \d/.exec(v) ?? ['card 1'];
+  card = parseInt(card[0].replace('card ', ''), 10);
+  let device: any = /device \d/.exec(v) ?? ['device 0'];
+  device = parseInt(device[0].replace('device ', ''), 10);
+
+  return { text: v, index: `hw:${card},${device}` };
+};
+
+const dic = ['fileSystem', 'size', 'used', 'avail', 'usedPercent', 'mounted'];
+
+const parser = (str) => {
+  return str
+    .split('\n')
+    .filter((item) => item)
+    .map((item) => item.split(' ').filter((s) => !!s))
+    .map((item) => {
+      const res = {};
+      dic.forEach((key, i) => (res[key] = item[i]));
+      return res;
+    })
+    .map((item) => ({
+      ...item,
+      total: parseFloat(item.size),
+      percentage: parseFloat(item['use%']),
+    }));
+};

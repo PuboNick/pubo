@@ -19,5 +19,7 @@ export interface PProcess {
   getProcessCommandByPid(pid: number): Promise<string>;
   isProcessDied(pid: number): Promise<boolean>;
   getProcessByPpid(ppid: number): Promise<number[]>;
-  SIGKILL(pid: number): Promise<{ success: boolean; error: string }>;
+  SIGKILL(pid: number, signal?: number, times?: number): Promise<{ success: boolean; error: string }>;
+  getDiskUsage?(): Promise<DiskInfo[]>;
+  getAudioCards?(filter?: string): Promise<{ text: string; index: string }[]>;
 }

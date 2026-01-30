@@ -112,11 +112,59 @@ export class PProcessWin32 implements PProcess {
     });
   }
 
-  async SIGKILL(pid: number): Promise<{ success: boolean; error: string }> {
+  async SIGKILL(pid: number, signal?: number, times?: number): Promise<{ success: boolean; error: string }> {
     return new Promise((resolve) => {
       exec(`taskkill /pid ${pid} /T /F`, (err: any) => {
         resolve({ success: true, error: err.toString() });
       });
     });
+  }
+
+  async getDiskUsage() {
+    return new Promise<any>((resolve) => {
+      exec('wmic logicaldisk get Caption,FreeSpace,Size /format:csv', (err, stdout) => {
+        if (err) {
+          resolve([]);
+          return;
+        }
+        const lines = stdout.split('\r\n').filter((line) => line.trim() !== '');
+        // format:csv output has a header line "Node,Caption,FreeSpace,Size" usually.
+        // It might also have empty lines.
+        const disks = lines
+          .map((line) => {
+             // CSV parsing: simple split by comma
+             const parts = line.split(',').map(s => s.trim());
+             if (parts.length < 4) return null; // Node, Caption, FreeSpace, Size
+             // Header check
+             if (parts[1] === 'Caption') return null;
+             
+             const caption = parts[1];
+             const freeSpace = parseInt(parts[2]);
+             const size = parseInt(parts[3]);
+             
+             if (isNaN(size) || isNaN(freeSpace)) return null;
+
+             const used = size - freeSpace;
+             const usedPercent = size > 0 ? (used / size) * 100 : 0;
+             
+             return {
+               fileSystem: caption,
+               size: size, // bytes
+               used: used,
+               avail: freeSpace,
+               usedPercent: `${usedPercent.toFixed(0)}%`,
+               mounted: caption,
+               total: size,
+               percentage: parseFloat(usedPercent.toFixed(0))
+             };
+          })
+          .filter((item) => item);
+        resolve(disks);
+      });
+    });
+  }
+
+  getAudioCards() {
+    return Promise.resolve([]);
   }
 }
