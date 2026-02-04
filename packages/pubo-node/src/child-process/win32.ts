@@ -132,31 +132,31 @@ export class PProcessWin32 implements PProcess {
         // It might also have empty lines.
         const disks = lines
           .map((line) => {
-             // CSV parsing: simple split by comma
-             const parts = line.split(',').map(s => s.trim());
-             if (parts.length < 4) return null; // Node, Caption, FreeSpace, Size
-             // Header check
-             if (parts[1] === 'Caption') return null;
-             
-             const caption = parts[1];
-             const freeSpace = parseInt(parts[2]);
-             const size = parseInt(parts[3]);
-             
-             if (isNaN(size) || isNaN(freeSpace)) return null;
+            // CSV parsing: simple split by comma
+            const parts = line.split(',').map((s) => s.trim());
+            if (parts.length < 4) return null; // Node, Caption, FreeSpace, Size
+            // Header check
+            if (parts[1] === 'Caption') return null;
 
-             const used = size - freeSpace;
-             const usedPercent = size > 0 ? (used / size) * 100 : 0;
-             
-             return {
-               fileSystem: caption,
-               size: size, // bytes
-               used: used,
-               avail: freeSpace,
-               usedPercent: `${usedPercent.toFixed(0)}%`,
-               mounted: caption,
-               total: size,
-               percentage: parseFloat(usedPercent.toFixed(0))
-             };
+            const caption = parts[1];
+            const freeSpace = parseInt(parts[2]);
+            const size = parseInt(parts[3]);
+
+            if (isNaN(size) || isNaN(freeSpace)) return null;
+
+            const used = size - freeSpace;
+            const usedPercent = size > 0 ? (used / size) * 100 : 0;
+
+            return {
+              fileSystem: caption,
+              size: size, // bytes
+              used: used,
+              avail: freeSpace,
+              usedPercent: `${usedPercent.toFixed(0)}%`,
+              mounted: caption,
+              total: size,
+              percentage: parseFloat(usedPercent.toFixed(0)),
+            };
           })
           .filter((item) => item);
         resolve(disks);
