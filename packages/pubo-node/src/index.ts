@@ -18,5 +18,5 @@ export {
 } from './child-process';
 export { getWifiName, getNetworks } from './utils/network';
 export { RosTopicManager, RosTopic } from './ros/topic';
-export { PuboFileSystem } from './file-system';
 export { PProcess } from './child-process/p-process';
+export { PuboFileSystem } from './file-system';
