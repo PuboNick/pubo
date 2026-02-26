@@ -1,6 +1,6 @@
 {
   "name": "pubo-web",
-  "version": "1.0.205",
+  "version": "1.0.206",
   "main": "./lib/index.js",
   "module": "./es/index.js",
   "types": "./lib/index.d.ts",
@@ -19,7 +19,7 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
-    "pubo-utils": "^1.0.203"
+    "pubo-utils": "^1.0.206"
   },
   "gitHead": "6cab20969ce73935cf78b48ddecfab0adca48174",
   "devDependencies": {
