@@ -191,15 +191,14 @@ export function fromLatLon({ latitude, longitude }: WGS84Position, forceZoneNum?
   };
 }
 
-export function latitudeToZoneLetter(latitude) {
+export function latitudeToZoneLetter(latitude: number): string | null {
   if (-80 <= latitude && latitude <= 84) {
     return ZONE_LETTERS[Math.floor((latitude + 80) / 8)];
-  } else {
-    return null;
   }
+  return null;
 }
 
-export function latLonToZoneNumber({ latitude, longitude }: WGS84Position) {
+export function latLonToZoneNumber({ latitude, longitude }: WGS84Position): number {
   if (56 <= latitude && latitude < 64 && 3 <= longitude && longitude < 12) return 32;
 
   if (72 <= latitude && latitude <= 84 && longitude >= 0) {
@@ -212,6 +211,6 @@ export function latLonToZoneNumber({ latitude, longitude }: WGS84Position) {
   return Math.floor((longitude + 180) / 6) + 1;
 }
 
-function zoneNumberToCentralLongitude(zoneNum) {
+function zoneNumberToCentralLongitude(zoneNum: number): number {
   return (zoneNum - 1) * 6 - 180 + 3;
 }

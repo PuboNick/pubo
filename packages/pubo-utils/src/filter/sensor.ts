@@ -31,7 +31,7 @@ export class SensorDataFilter {
     this.old = this.min;
   }
 
-  filter(n: number) {
+  filter(n: number): number {
     // 溢出范围的值将被忽略
     if (n < this.min || n > this.max) {
       return this.old;
@@ -42,7 +42,7 @@ export class SensorDataFilter {
     return this.old;
   }
 
-  private calc(n) {
+  private calc(n: number): number {
     // 缓冲区没有值时直接返回当前值
     if (this.tmp.length < 1) {
       return n;
@@ -84,50 +84,40 @@ export class SensorDataFilter {
   }
 
   /**
-   * A function to calculate the most frequent element in the 'tmp' array and its frequency.
-   *
-   * @return {object} An object containing the most frequent element and its frequency.
+   * 计算缓冲区中出现次数最多的值及其频率
    */
-
-  private getMostNumberOfTmp() {
-    const a = {};
+  private getMostNumberOfTmp(): { res: number; dic: Record<string, number> } {
+    const dic: Record<string, number> = {};
     let max = 0;
-    let res;
+    let res = 0;
     for (const item of this.tmp) {
-      if (!a[item]) {
-        a[item] = 1;
-      } else {
-        a[item] += 1;
-      }
+      const key = String(item);
+      dic[key] = (dic[key] || 0) + 1;
 
-      if (a[item] >= max) {
-        max = a[item];
+      if (dic[key] >= max) {
+        max = dic[key];
         res = item;
       }
     }
-    return { res, dic: a };
+    return { res, dic };
   }
 }
 
 /**
- * Splits the input string using the specified split symbol and returns an array of substrings.
- *
- * @param {string} str - the input string to be split
- * @return {string[]} an array of substrings
+ * 字符串分割器，按指定分隔符分割字符串并缓存未完成部分
  */
-
 export class StringSplit {
-  private readonly _splitSymbol: string;
-  private _cache = '';
+  private readonly splitSymbol: string;
+  private cache = '';
 
   constructor(splitSymbol: string) {
-    this._splitSymbol = splitSymbol;
+    this.splitSymbol = splitSymbol;
   }
 
   split(str: string): string[] {
-    const tmp = this._cache + str;
-    const arr = tmp.split(this._splitSymbol);
-    this._cache = arr.splice(arr.length - 1, 1)[0];
+    const tmp = this.cache + str;
+    const arr = tmp.split(this.splitSymbol);
+    this.cache = arr.pop() || '';
     return arr;
   }
 }

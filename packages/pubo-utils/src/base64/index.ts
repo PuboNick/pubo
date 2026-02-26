@@ -1,19 +1,17 @@
-export const EncoderMap = (function () {
-  const S = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  const e = {};
-  for (let i = 0; i < 64; i++) {
-    e[S.charAt(i)] = i;
-  }
-  return e;
-})();
+const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+const EncoderMap: Record<string, number> = {};
+for (let i = 0; i < 64; i++) {
+  EncoderMap[BASE64_CHARS.charAt(i)] = i;
+}
 
 /**
  * base64 转Uint8Array
  * @param input base64 字符串
- * @param output Uint8Array
+ * @returns Uint8Array
  * base64 6位的二进制, Uint8Array 8位的二进制，整体原理就是将 base64 的每个字符转成2进制然后拼接，再按每个八位为一个单位地取出
  */
-export function toUnit8Array(input) {
+export function toUnit8Array(input: string): Uint8Array {
   const output = new Uint8Array((input.length * 6) / 8);
   // 当前二进制字符长度
   let l = 0;

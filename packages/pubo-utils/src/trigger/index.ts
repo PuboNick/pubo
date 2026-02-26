@@ -5,7 +5,7 @@ interface ContinuousTriggerProps {
 }
 
 export class ContinuousTrigger {
-  private timeout: any;
+  private timeout: ReturnType<typeof setTimeout> | null = null;
   private _count = 0;
   private readonly props: ContinuousTriggerProps;
 
@@ -13,23 +13,27 @@ export class ContinuousTrigger {
     this.props = props;
   }
 
-  get count() {
+  get count(): number {
     return this._count;
   }
 
-  increment() {
-    clearTimeout(this.timeout);
+  increment(): void {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
     this.timeout = setTimeout(() => this.clear(), this.props.resetTime);
 
-    this._count = this._count + 1;
-    if (this._count > this.props.count) {
+    this._count += 1;
+    if (this._count >= this.props.count) {
       this.props.cb();
     }
   }
 
-  clear() {
-    clearTimeout(this.timeout);
+  clear(): void {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }
     this._count = 0;
-    this.timeout = 0;
   }
 }

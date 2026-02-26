@@ -1,20 +1,24 @@
 export class RegExpList {
-  list: string[];
-  private _RegExpList: RegExp[] | null = null;
+  private readonly patterns: string[];
+  private compiledPatterns: RegExp[] | null = null;
 
-  constructor(list: string[]) {
-    this.list = list;
+  constructor(patterns: string[]) {
+    this.patterns = patterns;
   }
 
-  private getRegEXP(item) {
-    const str = item.replace('/', '\\/').replace('*', '.*');
-    return new RegExp(str);
+  private compilePattern(pattern: string): RegExp {
+    // 转义特殊正则字符，然后处理通配符
+    const escaped = pattern
+      .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*/g, '.*')
+      .replace(/\//g, '\\/');
+    return new RegExp(`^${escaped}$`);
   }
 
-  include(value: string) {
-    if (!this._RegExpList) {
-      this._RegExpList = this.list.map(this.getRegEXP);
+  include(value: string): boolean {
+    if (!this.compiledPatterns) {
+      this.compiledPatterns = this.patterns.map((p) => this.compilePattern(p));
     }
-    return this._RegExpList.some((item) => item.test(value));
+    return this.compiledPatterns.some((regex) => regex.test(value));
   }
 }

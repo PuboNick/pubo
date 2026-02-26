@@ -1,16 +1,11 @@
-const str2int = (str) => parseInt(str.replace('#', ''), 16);
+const str2int = (str: string): number => parseInt(str.replace('#', ''), 16);
 
 export const hex2rgb = (n: number | string): [number, number, number] => {
-  let v: number;
-  if (typeof n === 'string') {
-    v = str2int(n);
-  } else {
-    v = n;
-  }
-  const str = v.toString(2).padStart(24, '0');
-  const r = parseInt(str.slice(0, 8), 2);
-  const g = parseInt(str.slice(8, 16), 2);
-  const b = parseInt(str.slice(16, 24), 2);
+  const v = typeof n === 'string' ? str2int(n) : n;
+  // 使用位运算优化性能
+  const r = (v >> 16) & 0xff;
+  const g = (v >> 8) & 0xff;
+  const b = v & 0xff;
   return [r, g, b];
 };
 
@@ -36,7 +31,7 @@ export class ColorUtils {
   }
 
   public get rgb() {
-    return `rba(${this.getRgbArray().join(', ')})`;
+    return `rgb(${this.getRgbArray().join(', ')})`;
   }
 
   public get hex() {

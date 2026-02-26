@@ -78,29 +78,26 @@ export const waitFor = (bool: WaitForBool, { checkTime, timeout }: { checkTime?:
   });
 };
 
-export const retry = async (
-  action: any,
-  { times = 5, interval = 1000 }: { times: number; interval: number } = { times: 5, interval: 1000 },
-) => {
+export const retry = async <T>(
+  action: () => Promise<T>,
+  { times = 5, interval = 1000 }: { times?: number; interval?: number } = {},
+): Promise<T> => {
   let count = 1;
-  const fn = async () => {
-    let result;
+  const fn = async (): Promise<T> => {
     if (count > times) {
       throw new Error('retry times exceed');
     }
     try {
-      result = await action();
-      return result;
+      return await action();
     } catch (err) {
       console.log(`action error, times ${count}`);
       console.log(err);
       await sleep(interval);
       count += 1;
-      await fn();
+      return fn();
     }
   };
-
-  await fn();
+  return fn();
 };
 
 export class RetryPlus {

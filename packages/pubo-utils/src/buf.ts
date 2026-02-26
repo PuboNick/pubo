@@ -1,25 +1,22 @@
 export class BufferSplit {
   private cache = Buffer.alloc(0);
-  private c: Buffer;
+  private readonly delimiter: Buffer;
 
-  constructor(buf: Buffer) {
-    this.c = buf;
+  constructor(delimiter: Buffer) {
+    this.delimiter = delimiter;
   }
 
-  push(buf: Buffer) {
-    // @ts-ignore
+  push(buf: Buffer): Buffer[] {
     const tmp = Buffer.concat([this.cache, buf]);
     const arr: Buffer[] = [];
     let n = 0;
 
-    for (let i = this.cache.byteLength; i <= tmp.byteLength - this.c.byteLength; i += 1) {
-      // @ts-ignore
-      const bool = this.c.equals(tmp.subarray(i, this.c.byteLength + i));
-      if (bool) {
-        const res = tmp.subarray(n, i);
-        arr.push(res);
-        n = this.c.byteLength + i;
-        i = this.c.byteLength + i;
+    for (let i = this.cache.byteLength; i <= tmp.byteLength - this.delimiter.byteLength; i += 1) {
+      const isMatch = this.delimiter.equals(tmp.subarray(i, this.delimiter.byteLength + i));
+      if (isMatch) {
+        arr.push(tmp.subarray(n, i));
+        n = this.delimiter.byteLength + i;
+        i = this.delimiter.byteLength + i - 1; // -1 因为循环会 +1
       }
     }
 

@@ -7,7 +7,7 @@ export type Vector2D = [number, number];
 
 // 获取两点的距离
 export const getDistance = (a: Point2D, b: Point2D): number => {
-  return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+  return Math.hypot(a.x - b.x, a.y - b.y);
 };
 
 // 弧度转角度
@@ -78,10 +78,16 @@ export const getBestPointIndex = (points: Point2D[], pose: Point2D & { theta: nu
     return 0;
   }
 
-  const temp: any = [];
+  interface PointInfo extends Point2D {
+    index: number;
+    distance: number;
+    theta: number;
+  }
+
+  const temp: PointInfo[] = [];
   let minDistance = Infinity;
-  let index = 0;
-  for (const item of points) {
+  for (let index = 0; index < points.length; index++) {
+    const item = points[index];
     const distance = getDistance(item, pose);
     const theta = getPositionTheta(pose, item) - pose.theta;
 
@@ -89,12 +95,11 @@ export const getBestPointIndex = (points: Point2D[], pose: Point2D & { theta: nu
       minDistance = distance;
     }
     temp.push({ ...item, index, distance, theta });
-    index += 1;
   }
 
   const results = temp
-    .filter((item: any) => item.distance - minDistance < 0.1)
-    .sort((a: any, b: any) => a.theta - b.theta);
+    .filter((item) => item.distance - minDistance < 0.1)
+    .sort((a, b) => a.theta - b.theta);
   return results[0].index;
 };
 

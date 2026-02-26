@@ -5,37 +5,30 @@ interface WatchDogProps {
 
 export class WatchDog {
   private readonly onTimeout: () => void;
-  private timeout: any = null;
+  private timeout: ReturnType<typeof setTimeout> | null = null;
   private readonly _time: number;
 
   constructor({ limit = 10, onTimeout }: WatchDogProps) {
     this._time = limit * 1000;
-
     this.onTimeout = () => {
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-        this.timeout = null;
-      }
+      this.stop();
       onTimeout();
     };
   }
 
-  feed() {
+  feed(): void {
     this.init();
   }
 
-  init() {
-    clearTimeout(this.timeout);
-    this.timeout = null;
-    delete this.timeout;
-
+  init(): void {
+    this.stop();
     this.timeout = setTimeout(this.onTimeout, this._time);
   }
 
-  stop() {
+  stop(): void {
     if (this.timeout) {
       clearTimeout(this.timeout);
+      this.timeout = null;
     }
-    delete this.timeout;
   }
 }

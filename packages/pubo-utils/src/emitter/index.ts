@@ -1,20 +1,27 @@
 import { random } from '../random';
 
+type Callback<T = unknown> = (payload: T) => void | Promise<void>;
+
+interface EmitterSnapshot {
+  state: Record<string, Record<string, Callback>>;
+  ids: Record<string, string>;
+}
+
 interface EmitterType {
-  on: (event: string, func: any) => string;
+  on: <T = unknown>(event: string, func: Callback<T>) => string;
   cancel: (id?: string) => void;
-  emit: (event: string, payload?: any) => any;
-  emitSync: (event: string, payload?: any) => Promise<any>;
+  emit: <T = unknown>(event: string, payload?: T) => void;
+  emitAsync: <T = unknown>(event: string, payload?: T) => Promise<void>;
   clear: () => void;
-  clone: () => any;
-  restore: (snapshot: any) => void;
+  clone: () => EmitterSnapshot;
+  restore: (snapshot: EmitterSnapshot) => void;
 }
 
 export class Emitter implements EmitterType {
-  private state: any = {};
-  ids: any = {};
+  private state: Record<string, Record<string, Callback>> = {};
+  private ids: Record<string, string> = {};
 
-  on(event: string, func: any) {
+  on<T = unknown>(event: string, func: Callback<T>): string {
     if (!this.state[event]) {
       this.state[event] = {};
     }
@@ -22,22 +29,19 @@ export class Emitter implements EmitterType {
       throw new Error('第二个参数必须为function!');
     }
 
-    const key = `${random(40)}_${new Date().valueOf()}`;
-    this.state[event][key] = func;
+    const key = `${random(40)}_${Date.now()}`;
+    this.state[event][key] = func as Callback;
     this.ids[key] = event;
     return key;
   }
 
-  cancel(id?: string) {
+  cancel(id?: string): void {
     if (!id) {
       return;
     }
 
     const event = this.ids[id];
-    if (!event) {
-      return;
-    }
-    if (!this.state[event]) {
+    if (!event || !this.state[event]) {
       return;
     }
     delete this.state[event][id];
@@ -47,15 +51,16 @@ export class Emitter implements EmitterType {
     delete this.ids[id];
   }
 
-  clear() {
+  clear(): void {
     this.state = {};
     this.ids = {};
   }
 
-  emit(event: string, payload?: any) {
-    if (this.state[event]) {
-      for (const key of Object.keys(this.state[event])) {
-        const func = this.state[event][key];
+  emit<T = unknown>(event: string, payload?: T): void {
+    const handlers = this.state[event];
+    if (handlers) {
+      for (const key of Object.keys(handlers)) {
+        const func = handlers[key];
         if (typeof func === 'function') {
           func(payload);
         }
@@ -63,10 +68,11 @@ export class Emitter implements EmitterType {
     }
   }
 
-  async emitSync(event: string, payload?: any) {
-    if (this.state[event]) {
-      for (const key of Object.keys(this.state[event])) {
-        const func = this.state[event][key];
+  async emitAsync<T = unknown>(event: string, payload?: T): Promise<void> {
+    const handlers = this.state[event];
+    if (handlers) {
+      for (const key of Object.keys(handlers)) {
+        const func = handlers[key];
         if (typeof func === 'function') {
           try {
             await func(payload);
@@ -78,25 +84,25 @@ export class Emitter implements EmitterType {
     }
   }
 
-  clone() {
+  clone(): EmitterSnapshot {
     return { state: { ...this.state }, ids: { ...this.ids } };
   }
 
-  restore(snapshot) {
+  restore(snapshot: EmitterSnapshot): void {
     this.state = snapshot.state;
     this.ids = snapshot.ids;
   }
 }
 
 export class CacheEmitter extends Emitter {
-  private readonly _cache: any = {};
+  private readonly _cache: Record<string, unknown> = {};
 
-  emit(event: string, payload?: any): void {
+  emit<T = unknown>(event: string, payload?: T): void {
     this._cache[event] = payload;
     super.emit(event, payload);
   }
 
-  getState(event: string) {
-    return this._cache[event];
+  getState<T = unknown>(event: string): T | undefined {
+    return this._cache[event] as T | undefined;
   }
 }

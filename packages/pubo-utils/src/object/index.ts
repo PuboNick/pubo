@@ -1,33 +1,42 @@
-export function cloneDeep(data: any, hash = new WeakMap()): any {
+export function cloneDeep<T>(data: T, hash = new WeakMap<object, unknown>()): T {
   if (typeof data !== 'object' || data === null) {
     return data;
-  } else if (hash.has(data)) {
-    return hash.get(data);
-  } else if (Array.isArray(data)) {
-    const clone = data.map((item) => cloneDeep(item, hash));
+  }
+  if (hash.has(data)) {
+    return hash.get(data) as T;
+  }
+  if (Array.isArray(data)) {
+    const clone = data.map((item) => cloneDeep(item, hash)) as T;
     hash.set(data, clone);
     return clone;
-  } else if (data instanceof Set) {
-    const clone = new Set([...data].map((item) => cloneDeep(item, hash)));
+  }
+  if (data instanceof Set) {
+    const clone = new Set([...data].map((item) => cloneDeep(item, hash))) as T;
     hash.set(data, clone);
     return clone;
-  } else if (data instanceof Map) {
-    const clone = new Map();
+  }
+  if (data instanceof Map) {
+    const clone = new Map<unknown, unknown>();
     for (const [key, value] of data.entries()) {
       clone.set(cloneDeep(key, hash), cloneDeep(value, hash));
     }
     hash.set(data, clone);
-    return clone;
-  } else {
-    const clone: Record<string, any> = {};
-    hash.set(data, clone);
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        clone[key] = cloneDeep(data[key], hash);
-      }
-    }
-    return clone;
+    return clone as T;
   }
+  if (data instanceof Date) {
+    return new Date(data) as T;
+  }
+  if (data instanceof RegExp) {
+    return new RegExp(data.source, data.flags) as T;
+  }
+  const clone: Record<string, unknown> = {};
+  hash.set(data, clone);
+  for (const key in data) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      clone[key] = cloneDeep(data[key], hash);
+    }
+  }
+  return clone as T;
 }
 
 export function getTreeItem(tree: any, indexes: number[]) {

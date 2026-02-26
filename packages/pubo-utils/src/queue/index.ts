@@ -1,71 +1,64 @@
 export class SyncQueue {
-  private readonly cache: any[] = [];
+  private readonly cache: Array<{
+    fn: () => Promise<unknown>;
+    resolve: (value: unknown) => void;
+    reject: (reason: unknown) => void;
+  }> = [];
   private running = false;
-  private len = 0;
 
-  private async _run({ fn, promise }) {
+  private async _run(item: (typeof this.cache)[0]) {
     try {
-      const res = await fn();
-      promise.resolve(res);
+      const res = await item.fn();
+      item.resolve(res);
     } catch (err) {
-      promise.reject(err);
+      item.reject(err);
     }
-    fn = null;
-    promise = null;
   }
 
   private async run() {
     if (this.cache.length < 1) {
       this.running = false;
       return;
-    } else {
-      this.running = true;
     }
+    this.running = true;
     const item = this.cache.shift();
-    this.len -= 1;
-    if (typeof item.fn === 'function') {
+    if (item) {
       await this._run(item);
     }
     this.run();
   }
 
-  public push(fn) {
-    this.len += 1;
-
+  public push<T>(fn: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
-      this.cache.push({ fn, promise: { resolve, reject } });
+      this.cache.push({ fn, resolve, reject });
       if (!this.running) {
         this.run();
       }
     });
   }
 
-  get length() {
-    return this.len;
+  get length(): number {
+    return this.cache.length;
   }
 }
 
-export const runAsyncTasks = async (list, j = 4) => {
-  let i = -1;
-  const t: any[] = [];
+export const runAsyncTasks = async (tasks: Array<() => Promise<unknown>>, concurrency = 4): Promise<void> => {
+  let index = -1;
 
-  const run = async () => {
-    i += 1;
-    if (!list[i]) {
+  const run = async (): Promise<void> => {
+    index += 1;
+    const task = tasks[index];
+    if (!task) {
       return;
     }
-
     try {
-      await list[i]();
+      await task();
     } catch (err) {
       console.log(err);
     }
     await run();
   };
 
-  for (let n = 0; n < j; n += 1) {
-    t.push(run());
-  }
-
-  await Promise.all(t);
+  const workers = Array.from({ length: concurrency }, () => run());
+  await Promise.all(workers);
 };
