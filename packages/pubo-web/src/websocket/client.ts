@@ -1,8 +1,10 @@
 import { Emitter } from 'pubo-utils';
 
+type ConnectionStatus = 0 | 1 | 2 | 3; // 0 默认 1 已连接 2 断开连接 3 重连
+
 export class WebsocketClient {
   private client: WebSocket | null = null;
-  private _status = 0; // 0 默认 1 已连接 2 断开连接 3 重连
+  private _status: ConnectionStatus = 0;
   private readonly url: string;
   emitter = new Emitter();
 
@@ -10,7 +12,7 @@ export class WebsocketClient {
     this.url = url;
   }
 
-  private reconnect() {
+  private reconnect(): void {
     if (this.client) {
       this.client.close();
     }
@@ -20,35 +22,35 @@ export class WebsocketClient {
     }
   }
 
-  private onClose() {
+  private onClose = (): void => {
     if (this._status !== 2) {
       this._status = 3;
     }
     this.reconnect();
-  }
+  };
 
-  private onMessage(e: any) {
+  private onMessage = (e: MessageEvent): void => {
     this.emitter.emit('message', e.data);
-  }
+  };
 
-  public get status() {
+  public get status(): ConnectionStatus {
     return this._status;
   }
 
-  connect() {
+  connect(): void {
     if (this.client) {
       return;
     }
     this.client = new WebSocket(this.url);
-    this.client.onclose = this.onClose.bind(this);
-    this.client.onmessage = this.onMessage.bind(this);
+    this.client.onclose = this.onClose;
+    this.client.onmessage = this.onMessage;
     this.client.onopen = () => {
       this.emitter.emit('connect');
       this._status = 1;
     };
   }
 
-  close() {
+  close(): void {
     this._status = 2;
     if (this.client) {
       this.client.close();
@@ -56,11 +58,8 @@ export class WebsocketClient {
     this.client = null;
   }
 
-  send(data: any, isJson = false) {
-    let res = data;
-    if (isJson) {
-      res = JSON.stringify(data);
-    }
-    this.client?.send(res);
+  send(data: unknown, isJson = false): void {
+    const res = isJson ? JSON.stringify(data) : data;
+    this.client?.send(res as string | ArrayBuffer | Blob);
   }
 }

@@ -13,7 +13,7 @@ interface WebStorageProps {
 
 export class WebStorage {
   private readonly _key: string;
-  private readonly storage: Window['sessionStorage'] | Window['localStorage'];
+  private readonly storage: Storage;
   private readonly zip?: Zip;
 
   constructor(props: WebStorageProps) {
@@ -23,36 +23,33 @@ export class WebStorage {
     this.zip = props.zip;
   }
 
-  get state() {
+  get state(): unknown | null {
     let value = this.storage.getItem(this._key);
     if (this.zip && value) {
       value = this.zip.inflate(value);
     }
     if (value) {
       return JSON.parse(value);
-    } else {
-      return null;
     }
+    return null;
   }
 
-  set state(data: any) {
-    let temp = JSON.stringify(data);
-    if (this.zip) {
-      temp = this.zip.deflate(temp);
-    }
-    this.storage.setItem(this._key, temp);
+  set state(data: unknown) {
+    const temp = JSON.stringify(data);
+    const value = this.zip ? this.zip.deflate(temp) : temp;
+    this.storage.setItem(this._key, value);
   }
 
-  get key() {
+  get key(): string {
     return this._key;
   }
 
-  merge(data: any) {
-    const old = this.state;
+  merge(data: Record<string, unknown>): void {
+    const old = this.state as Record<string, unknown> | null;
     this.state = { ...old, ...data };
   }
 
-  clear() {
+  clear(): void {
     this.storage.removeItem(this._key);
   }
 }

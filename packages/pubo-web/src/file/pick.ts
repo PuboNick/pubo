@@ -3,15 +3,16 @@ export const pickFiles = (): Promise<FileList> => {
     const el = document.createElement('input');
     let picked = false;
 
-    const onFocus = () => {
+    const onFocus = (): void => {
       document.body.removeChild(el);
       window.removeEventListener('focus', onFocus);
       setTimeout(() => {
         if (!picked) {
-          reject('no files picked');
+          reject(new Error('no files picked'));
         }
       }, 1000);
     };
+
     el.type = 'file';
     el.style.visibility = 'hidden';
     el.style.position = 'fixed';
@@ -19,9 +20,10 @@ export const pickFiles = (): Promise<FileList> => {
     el.style.zIndex = '-1';
     window.addEventListener('focus', onFocus);
 
-    el.onchange = (e: any) => {
-      picked = e.target.files.length > 0;
-      resolve(e.target.files);
+    el.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      picked = target.files !== null && target.files.length > 0;
+      resolve(target.files!);
     };
 
     document.body.appendChild(el);

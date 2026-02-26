@@ -1,16 +1,20 @@
+interface ScriptElement extends HTMLScriptElement {
+  _state?: string;
+}
+
+interface LoadScriptOptions {
+  [key: string]: string;
+}
+
 /**
  * Loads a script from the given URL with the provided options.
- *
- * @param {string} url - The URL of the script to load
- * @param {any} options - Additional options for loading the script
- * @return {Promise<any>} A Promise that resolves with the URL once the script is loaded
  */
-export const loadScript = (url: string, options: any = {}) => {
-  const findScript = () => {
-    const list: any = document.getElementsByTagName('script');
+export const loadScript = (url: string, options: LoadScriptOptions = {}): Promise<string> => {
+  const findScript = (): ScriptElement | null => {
+    const list = document.getElementsByTagName('script');
     for (const item of list) {
       if (item.src === url) {
-        return item;
+        return item as ScriptElement;
       }
     }
     return null;
@@ -18,25 +22,30 @@ export const loadScript = (url: string, options: any = {}) => {
 
   return new Promise((resolve) => {
     const old = findScript();
-    let el: any = old;
+    let el: ScriptElement;
 
     if (!old) {
       el = document.createElement('script');
     } else if (old._state === 'complete') {
       return resolve(url);
+    } else {
+      el = old;
     }
 
     for (const key of Object.keys(options)) {
       el[key] = options[key];
     }
-    const onLoad = () => {
+
+    const onLoad = (): void => {
       resolve(url);
       el.removeEventListener('load', onLoad);
       el._state = 'complete';
     };
-    el.src = url;
-    el.addEventListener('load', onLoad);
-    document.body.appendChild(el);
-    return 'success';
+
+    if (!old) {
+      el.src = url;
+      el.addEventListener('load', onLoad);
+      document.body.appendChild(el);
+    }
   });
 };

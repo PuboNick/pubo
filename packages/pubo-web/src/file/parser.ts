@@ -1,24 +1,26 @@
-export const blob2text = (blob: any) => {
-  return new Promise((resolve) => {
+export const blob2text = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e: any) => resolve(e.target.result);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
     reader.readAsText(blob);
   });
 };
 
-export const blob2base64 = (blob: any): any => {
-  return new Promise(function (resolve, reject) {
+export const blob2base64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     if (!blob) {
-      reject('文件爲空!');
+      reject(new Error('文件为空!'));
     } else {
-      reader.onload = (e: any) => resolve(e.target.result);
-      reader.onabort = () => reject();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onabort = () => reject(new Error('读取中断'));
+      reader.onerror = reject;
       reader.readAsDataURL(blob);
     }
   });
 };
 
-export const blob2file = (blob: any, name: string, type: string) => {
-  return new File(blob, name, { type });
+export const blob2file = (blob: Blob, name: string, type: string): File => {
+  return new File([blob], name, { type });
 };

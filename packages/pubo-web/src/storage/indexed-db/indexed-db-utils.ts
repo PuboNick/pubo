@@ -1,87 +1,82 @@
 export interface IndexedTable {
   name: string;
-  options?: any;
-  default?: any;
+  options?: IDBObjectStoreParameters;
+  default?: Record<string, unknown>;
 }
 
 export class IndexedDBUtils {
   private readonly name: string;
   private readonly version: number;
-  private readonly indexedDB = self.indexedDB;
+  private readonly indexedDB: IDBFactory;
   private readonly tables: IndexedTable[];
-  private db: null | any;
-  private transaction: any;
+  private db: IDBDatabase | null = null;
 
   constructor(name: string, version: number, tables: IndexedTable[]) {
     this.name = name;
     this.version = version;
     this.tables = tables;
+    this.indexedDB = self.indexedDB;
   }
 
-  open() {
+  open(): Promise<string> {
     return new Promise((resolve, reject) => {
-      const request = this.indexedDB?.open(this.name, this.version);
-      request.onupgradeneeded = async (event) => {
-        // @ts-ignore
-        const db = event.target.result;
+      if (!this.indexedDB) {
+        reject(new Error('IndexedDB is not supported'));
+        return;
+      }
 
-        // @ts-ignore
-        this.transaction = event.target.transaction;
-        this.transaction.oncomplete = async () => {
-          this.transaction = null;
-          for (const table of this.tables) {
-            if (table.default) {
-              await this.put(table.name, table.default);
-            }
-          }
-        };
+      const request = this.indexedDB.open(this.name, this.version);
+
+      request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
+        const db = (event.target as IDBOpenDBRequest).result;
 
         for (const table of this.tables) {
           if (!db.objectStoreNames.contains(table.name)) {
             db.createObjectStore(table.name, table.options || { keyPath: '_id', autoIncrement: true });
           }
         }
-
-        this.db = db;
       };
 
-      request.onsuccess = () => {
-        if (!this.db) {
-          this.db = request.result;
-        }
+      request.onsuccess = (): void => {
+        this.db = request.result;
         resolve('success');
       };
-      request.onerror = (error) => {
-        console.error('indexed db connect error: ', error);
-        reject(error);
+
+      request.onerror = (event: Event): void => {
+        console.error('indexed db connect error: ', event);
+        reject(event);
       };
     });
   }
 
-  private createTransaction(
-    getRequest: (objectStore: any, ...args: any[]) => any,
-  ): (store: string, values?: any) => Promise<any> {
-    return (store: string, ...args: any): Promise<any> => {
+  private createTransaction<T>(
+    getRequest: (objectStore: IDBObjectStore, ...args: unknown[]) => IDBRequest<T>,
+  ): (store: string, ...args: unknown[]) => Promise<T | undefined> {
+    return (store: string, ...args: unknown[]): Promise<T | undefined> => {
       return new Promise((resolve, reject) => {
         if (!this.db) {
-          reject('not connect');
+          reject(new Error('not connected'));
           return;
         }
         const transaction = this.db.transaction([store], 'readwrite');
         const objectStore = transaction.objectStore(store);
         const request = getRequest(objectStore, ...args);
-        request.onerror = function (event: any) {
+
+        request.onerror = (event: Event): void => {
           reject(event);
         };
-        request.onsuccess = function () {
+
+        request.onsuccess = (): void => {
           resolve(request.result);
         };
       });
     };
   }
 
-  get = this.createTransaction((objectStore, key) => objectStore.get(key));
-  getAll = this.createTransaction((objectStore) => objectStore.getAll());
-  delete = this.createTransaction((objectStore, key) => objectStore.delete(key));
-  put = this.createTransaction((objectStore, values) => objectStore.put(values));
+  get = this.createTransaction<unknown>((objectStore, key) => objectStore.get(key as IDBValidKey));
+  getAll = this.createTransaction<unknown[]>((objectStore) => objectStore.getAll());
+  delete = this.createTransaction<void>((objectStore, key) => objectStore.delete(key as IDBValidKey));
+  put = this.createTransaction<IDBValidKey>((objectStore, values) =>
+    objectStore.put(values as Record<string, unknown>),
+  );
 }

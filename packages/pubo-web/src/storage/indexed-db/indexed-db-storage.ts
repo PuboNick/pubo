@@ -11,17 +11,17 @@ export class Storage {
     this.store = store;
   }
 
-  async getState(): Promise<any> {
-    return this.utils.get(this.store, 1);
+  async getState(): Promise<Record<string, unknown> | undefined> {
+    return this.utils.get(this.store, 1) as Promise<Record<string, unknown> | undefined>;
   }
 
-  setState(values: any) {
+  setState(values: Record<string, unknown>): void {
     this.utils.put(this.store, { ...values, _id: 1 });
   }
 
-  async merge(values: any) {
+  async merge(values: Record<string, unknown>): Promise<void> {
     const state = await this.getState();
-    this.setState = { ...state, ...values, _id: 1 };
+    this.setState({ ...state, ...values });
   }
 }
 
@@ -35,7 +35,7 @@ export class IndexedStorage {
   private readonly name: string;
   private readonly version: number;
   public utils!: IndexedDBUtils;
-  private _cache: any = {};
+  private readonly cache: Map<string, Storage> = new Map();
   private readonly tables: IndexedTable[] = [];
   private connected = false;
   private connecting = false;
@@ -46,11 +46,11 @@ export class IndexedStorage {
     this.tables = tables ?? [];
   }
 
-  register(tables: IndexedTable[]) {
+  register(tables: IndexedTable[]): void {
     this.tables.push(...tables);
   }
 
-  async connect() {
+  async connect(): Promise<void> {
     if (this.connected) {
       return;
     }
@@ -68,9 +68,9 @@ export class IndexedStorage {
   }
 
   get(store: string): Storage {
-    if (!this._cache[store] && this.utils) {
-      this._cache[store] = new Storage(this.utils, store);
+    if (!this.cache.has(store) && this.utils) {
+      this.cache.set(store, new Storage(this.utils, store));
     }
-    return this._cache[store];
+    return this.cache.get(store)!;
   }
 }
