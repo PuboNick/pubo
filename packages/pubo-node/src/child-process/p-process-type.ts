@@ -1,6 +1,6 @@
 export interface PidTree {
   pid: number;
-  children: PidTree;
+  children: PidTree[];
 }
 
 export interface DiskInfo {
@@ -9,7 +9,9 @@ export interface DiskInfo {
   used: number;
   avail: number;
   usedPercent: number;
-  mounted: number;
+  mounted: string;
+  total?: number;
+  percentage?: number;
 }
 
 export interface PProcess {

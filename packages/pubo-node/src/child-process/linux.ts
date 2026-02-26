@@ -1,10 +1,10 @@
 import { exec } from 'child_process';
-import { PProcess } from './p-process-type';
+import { PProcess, DiskInfo } from './p-process-type';
 import { waitFor } from 'pubo-utils';
 import { getProcessList } from '.';
 
 export class PProcessLinux implements PProcess {
-  private async _SIGKILL(pid, signal = 2, times = 1) {
+  private async _SIGKILL(pid: number, signal = 2, times = 1): Promise<void> {
     if (times > 5) {
       throw new Error('SIGKILL 失败. times > 5');
     }
@@ -15,39 +15,36 @@ export class PProcessLinux implements PProcess {
         checkTime: 100,
         timeout: 4000,
       });
-    } catch (err) {
+    } catch {
       await this._SIGKILL(pid, 9, times + 1);
     }
   }
 
-  getProcessName(pid): Promise<string> {
+  getProcessName(pid: number): Promise<string> {
     return new Promise((resolve, reject) => {
       exec(`grep "Name:" /proc/${pid}/status`, (err, data) => {
         if (err) {
           reject(err);
         } else {
-          resolve(data.toString().split(':')[1]?.trim());
+          resolve(data.toString().split(':')[1]?.trim() ?? '');
         }
       });
     });
   }
 
-  getPidByPort(port): Promise<number> {
+  getPidByPort(port: number): Promise<number> {
     return new Promise((resolve, reject) => {
       exec(`lsof -i:${port} | awk '{print $2}'`, (err, stdout) => {
         if (err) {
           reject(err);
         } else {
-          let res: any = stdout.split('\n')[1];
-          if (res) {
-            res = res.trim();
-          }
-          res = parseInt(res);
-          if (isNaN(res)) {
-            reject('process not found');
+          const res = stdout.split('\n')[1]?.trim();
+          const pid = parseInt(res ?? '', 10);
+          if (isNaN(pid)) {
+            reject(new Error('process not found'));
             return;
           }
-          resolve(res);
+          resolve(pid);
         }
       });
     });
@@ -71,32 +68,29 @@ export class PProcessLinux implements PProcess {
         if (err) {
           resolve('');
         } else {
-          resolve(stdout.toString().split('\n')[0]);
+          resolve(stdout.toString().split('\n')[0] ?? '');
         }
       });
     });
   }
 
-  async isProcessDied(pid: number) {
+  async isProcessDied(pid: number): Promise<boolean> {
     const used = await this.getProcessCpuUseByPid(pid);
     return used < 0;
   }
 
   getProcessByPpid(pid: number): Promise<number[]> {
     return new Promise((resolve) => {
-      let child: any = exec(`ps -o pid --no-headers --ppid ${pid}`, (err, stdout) => {
+      exec(`ps -o pid --no-headers --ppid ${pid}`, (err, stdout) => {
         if (err) {
           resolve([]);
-          child = null;
         } else {
-          resolve(
-            stdout
-              .split('\n')
-              .filter((item) => !!item)
-              .map((item) => parseFloat(item.trim()))
-              .filter((item) => item !== child.pid),
-          );
-          child = null;
+          const pidList = stdout
+            .split('\n')
+            .filter((item) => !!item)
+            .map((item) => parseFloat(item.trim()))
+            .filter((item) => !isNaN(item));
+          resolve(pidList);
         }
       });
     });
@@ -104,12 +98,12 @@ export class PProcessLinux implements PProcess {
 
   async SIGKILL(pid: number, signal = 2, times = 1): Promise<{ success: boolean; error: string }> {
     const tmp = await getProcessList(pid);
-    const res: any = { success: true, error: '' };
+    const res: { success: boolean; error: string } = { success: true, error: '' };
     for (const item of tmp) {
       try {
         await this._SIGKILL(item, signal, times);
       } catch (err) {
-        res.error = err;
+        res.error = String(err);
         res.success = false;
       }
     }
@@ -117,13 +111,13 @@ export class PProcessLinux implements PProcess {
     return res;
   }
 
-  async getDiskUsage() {
-    return new Promise<any>((resolve) => {
+  async getDiskUsage(): Promise<DiskInfo[]> {
+    return new Promise((resolve) => {
       exec('df -h | grep G', (err, stdout) => {
         if (err) {
           resolve([]);
         } else {
-          resolve(parser(stdout.toString()));
+          resolve(parseDiskUsage(stdout.toString()));
         }
       });
     });
@@ -148,30 +142,48 @@ export class PProcessLinux implements PProcess {
   }
 }
 
-const parseAudioCard = (v: string) => {
-  let card: any = /card \d/.exec(v) ?? ['card 1'];
-  card = parseInt(card[0].replace('card ', ''), 10);
-  let device: any = /device \d/.exec(v) ?? ['device 0'];
-  device = parseInt(device[0].replace('device ', ''), 10);
+const parseAudioCard = (v: string): { text: string; index: string } => {
+  const cardMatch = /card (\d+)/.exec(v) ?? ['card 1', '1'];
+  const deviceMatch = /device (\d+)/.exec(v) ?? ['device 0', '0'];
+  const card = parseInt(cardMatch[1], 10);
+  const device = parseInt(deviceMatch[1], 10);
 
   return { text: v, index: `hw:${card},${device}` };
 };
 
-const dic = ['fileSystem', 'size', 'used', 'avail', 'usedPercent', 'mounted'];
+interface DiskUsageRaw {
+  fileSystem: string;
+  size: string;
+  used: string;
+  avail: string;
+  usePercent: string;
+  mounted: string;
+}
 
-const parser = (str) => {
+const parseDiskUsage = (str: string): DiskInfo[] => {
+  const keys = ['fileSystem', 'size', 'used', 'avail', 'usePercent', 'mounted'];
   return str
     .split('\n')
     .filter((item) => item)
-    .map((item) => item.split(' ').filter((s) => !!s))
     .map((item) => {
-      const res = {};
-      dic.forEach((key, i) => (res[key] = item[i]));
-      return res;
-    })
-    .map((item) => ({
-      ...item,
-      total: parseFloat(item.size),
-      percentage: parseFloat(item['use%']),
-    }));
+      const values = item.split(' ').filter((s) => !!s);
+      const raw: DiskUsageRaw = {
+        fileSystem: values[0] ?? '',
+        size: values[1] ?? '',
+        used: values[2] ?? '',
+        avail: values[3] ?? '',
+        usePercent: values[4] ?? '',
+        mounted: values[5] ?? '',
+      };
+      return {
+        fileSystem: raw.fileSystem,
+        size: parseFloat(raw.size),
+        used: parseFloat(raw.used),
+        avail: parseFloat(raw.avail),
+        usedPercent: parseFloat(raw.usePercent.replace('%', '')),
+        mounted: raw.mounted,
+        total: parseFloat(raw.size),
+        percentage: parseFloat(raw.usePercent.replace('%', '')),
+      };
+    });
 };

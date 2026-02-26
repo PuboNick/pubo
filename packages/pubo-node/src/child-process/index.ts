@@ -3,15 +3,20 @@ import { PProcess } from './p-process-type';
 import { PProcessLinux } from './linux';
 import { PProcessWin32 } from './win32';
 
+interface ProcessTree {
+  pid: number;
+  children: ProcessTree[];
+}
+
 const processManager: PProcess = process.platform === 'win32' ? new PProcessWin32() : new PProcessLinux();
 
 // 获取进程名称
-export function getProcessName(pid): Promise<string> {
+export function getProcessName(pid: number): Promise<string> {
   return processManager.getProcessName(pid);
 }
 
 // 根据端口号获取进程PID
-export async function getPidByPort(port) {
+export async function getPidByPort(port: number): Promise<number> {
   return processManager.getPidByPort(port);
 }
 
@@ -26,7 +31,7 @@ export function getProcessCommandByPid(pid: number): Promise<string> {
 }
 
 // 判断进程是否死亡
-export async function isProcessDied(pid: number) {
+export async function isProcessDied(pid: number): Promise<boolean> {
   return processManager.isProcessDied(pid);
 }
 
@@ -36,7 +41,7 @@ export function getProcessByPpid(pid: number): Promise<number[]> {
 }
 
 // 获取进程树
-export const getProcessTree = async (pid: number, tree?: any) => {
+export const getProcessTree = async (pid: number, tree?: ProcessTree): Promise<ProcessTree | null> => {
   let isRoot = false;
   if (!tree) {
     isRoot = true;
@@ -44,56 +49,51 @@ export const getProcessTree = async (pid: number, tree?: any) => {
   }
   const pidList = await getProcessByPpid(pid);
   for (const id of pidList) {
-    const item = { pid: id, children: [] };
+    const item: ProcessTree = { pid: id, children: [] };
     await getProcessTree(id, item);
     tree.children.push(item);
   }
   if (isRoot) {
     return tree;
-  } else {
-    tree = null;
-    return null;
   }
+  return null;
 };
 
 // 广度优先遍历进程树，将pid放入tmp
-const flatProcessTree = (tree: any, tmp: any[]) => {
+const flatProcessTree = (tree: ProcessTree, tmp: number[]): void => {
   if (tree.children) {
     tmp.push(...tree.children.map((item) => item.pid));
     tree.children.forEach((item) => flatProcessTree(item, tmp));
   }
-  tree = null;
-  (tmp as any) = null;
 };
 
 // 获取所有进程PID,从叶到根
-export const getProcessList = async (pid) => {
-  let tree = await getProcessTree(pid);
+export const getProcessList = async (pid: number): Promise<number[]> => {
+  const tree = await getProcessTree(pid);
   const tmp: number[] = [];
-  if (!tree.pid) {
+  if (!tree?.pid) {
     return tmp;
   }
   tmp.push(tree.pid);
   flatProcessTree(tree, tmp);
   tmp.reverse();
-  tree = null;
   return tmp;
 };
 
 // 杀死进程以及子进程
-export async function SIGKILL(pid: number, signal = 2, times = 1) {
+export async function SIGKILL(pid: number, signal = 2, times = 1): Promise<{ success: boolean; error: string }> {
   return processManager.SIGKILL(pid, signal, times);
 }
 
 // 子进程心跳包
-export const heartbeat = () => {
+export const heartbeat = (): void => {
   if (typeof process.send !== 'function') {
     return;
   }
 
   loop(async () => {
-    await new Promise((resolve: any) => {
-      (process as any).send({ type: 'beat', timestamp: new Date().valueOf() }, resolve);
+    await new Promise<void>((resolve) => {
+      process.send!({ type: 'beat', timestamp: Date.now() }, resolve);
     });
   }, 6000);
 };
@@ -105,7 +105,7 @@ export const getAudioCards = (filter = ''): Promise<{ text: string; index: strin
   return Promise.resolve([]);
 };
 
-export const getDiskUsage = async () => {
+export const getDiskUsage = async (): Promise<unknown[]> => {
   if (processManager.getDiskUsage) {
     return processManager.getDiskUsage();
   }

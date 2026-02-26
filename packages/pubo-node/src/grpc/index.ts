@@ -1,38 +1,81 @@
-export interface CreateClientProps {
+export interface CreateClientProps<T = unknown> {
   url: string;
-  options?: any;
-  ServiceImp: any;
-  Grpc: any;
+  options?: GrpcClientOptions;
+  ServiceImp: new (impl: { request: GrpcRequestFn }) => T;
+  Grpc: GrpcStatic;
   cert?: Buffer;
 }
 
-const passThrough: any = (argument) => argument;
+interface GrpcClientOptions {
+  'grpc.max_send_message_length'?: number;
+  'grpc.max_receive_message_length'?: number;
+  timeout?: number;
+}
+
+interface GrpcCredentials {
+  createSsl(cert?: Buffer): GrpcCredentials;
+  createInsecure(): GrpcCredentials;
+}
+
+interface GrpcClientStatic {
+  new (address: string, credentials: GrpcCredentials, options: GrpcClientOptions): GrpcClientInstance;
+}
+
+interface GrpcClientInstance {
+  close(): void;
+  makeUnaryRequest(
+    path: string,
+    serialize: (obj: unknown) => Buffer,
+    deserialize: (bytes: Buffer) => unknown,
+    data: Buffer,
+    callback: (err: Error | null, response: Buffer) => void,
+  ): void;
+}
+
+type GrpcRequestFn = (service: string, method: string, data?: unknown) => Promise<Buffer>;
+
+interface GrpcStatic {
+  credentials: GrpcCredentials;
+  Client: GrpcClientStatic;
+}
+
+const passThrough = (argument) => argument;
 
 class GrpcClient {
   private readonly url: string;
-  private readonly options: any;
-  private readonly Grpc: any;
-  private readonly credentials: any;
-  private client: any;
-  private _timeout: any;
+  private readonly options: GrpcClientOptions;
+  private readonly Grpc;
+  private readonly credentials: GrpcCredentials;
+  private client: GrpcClientInstance | null = null;
+  private _timeout: ReturnType<typeof setTimeout> | null = null;
   connections = 0;
 
-  constructor({ url, options = {}, Grpc, cert }: any) {
-    const opt = { 'grpc.max_send_message_length': -1, 'grpc.max_receive_message_length': -1, ...options };
+  constructor({
+    url,
+    options = {},
+    Grpc,
+    cert,
+  }: {
+    url: string;
+    options?: GrpcClientOptions;
+    Grpc: GrpcStatic;
+    cert?: Buffer;
+  }) {
+    const opt: GrpcClientOptions = {
+      'grpc.max_send_message_length': -1,
+      'grpc.max_receive_message_length': -1,
+      ...options,
+    };
     const credentials = cert ? Grpc.credentials.createSsl(cert) : Grpc.credentials.createInsecure();
 
     this.url = url;
     this.Grpc = Grpc;
     this.credentials = credentials;
     this.options = opt;
-    this.options.timeout = this.options.timeout ?? 10000;
-
-    Grpc = null;
-    options = null;
-    cert = null;
+    this.options.timeout ??= 10000;
   }
 
-  async request(service, method, data) {
+  async request(service: string, method: string, data?: unknown): Promise<Buffer> {
     if (this._timeout) {
       clearTimeout(this._timeout);
       this._timeout = null;
@@ -44,18 +87,14 @@ class GrpcClient {
       this.client = new this.Grpc.Client(this.url, this.credentials, this.options);
     }
 
-    let error;
+    let error: Error | null = null;
     let result = Buffer.alloc(0);
 
     try {
       result = await this._request({ service, method, data });
     } catch (err) {
-      error = err;
+      error = err as Error;
     }
-
-    service = null;
-    method = null;
-    data = null;
 
     this.connections -= 1;
 
@@ -66,7 +105,6 @@ class GrpcClient {
     if (this.connections < 1) {
       if (this._timeout) {
         clearTimeout(this._timeout);
-        this._timeout = null;
       }
       this._timeout = setTimeout(() => this.close(), 60000);
     }
@@ -80,23 +118,22 @@ class GrpcClient {
     return result;
   }
 
-  _request({ service, method, data }): Promise<Buffer> {
+  private _request({ service, method, data }: { service: string; method: string; data?: unknown }): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      let _ended = false;
-      const _timeout: any = setTimeout(() => {
-        _ended = true;
+      let ended = false;
+      const timeout = setTimeout(() => {
+        ended = true;
         this.close();
 
         console.log('rpc request timeout');
         reject(new Error('timeout'));
       }, this.options.timeout);
 
-      const onResponse: any = (err: any, res) => {
-        if (_ended) {
+      const onResponse = (err: Error | null, res: Buffer): void => {
+        if (ended) {
           return;
-        } else {
-          clearTimeout(_timeout);
         }
+        clearTimeout(timeout);
 
         if (err) {
           reject(err);
@@ -105,34 +142,31 @@ class GrpcClient {
         }
       };
 
-      this.client.makeUnaryRequest(
+      this.client!.makeUnaryRequest(
         `/${service}/${method}`,
         passThrough,
         passThrough,
-        data ? Buffer.from(data) : Buffer.alloc(0),
+        data ? Buffer.from(JSON.stringify(data)) : Buffer.alloc(0),
         onResponse,
       );
     });
   }
 
-  close() {
+  close(): void {
     if (this._timeout) {
       clearTimeout(this._timeout);
-      delete this._timeout;
+      this._timeout = null;
     }
     this.client?.close();
     this.client = null;
-    delete this.client;
   }
 }
 
 export const GrpcList: GrpcClient[] = [];
 
-export function createRpcClient<T>({ url, options = {}, ServiceImp, Grpc, cert }: CreateClientProps): T {
+export function createRpcClient<T>({ url, options, ServiceImp, Grpc, cert }: CreateClientProps<T>): T {
   const client = new GrpcClient({ url, options, Grpc, cert });
   GrpcList.push(client);
 
-  Grpc = null;
-  options = null;
   return new ServiceImp({ request: client.request.bind(client) });
 }

@@ -19,4 +19,3 @@ export {
 export { getWifiName, getNetworks } from './utils/network';
 export { RosTopicManager, RosTopic } from './ros/topic';
 export { PProcess } from './child-process/p-process';
-export { PuboFileSystem } from './file-system';

@@ -14,7 +14,18 @@ export interface FtpConnectOptions {
   user: string;
   host: string;
   password: string;
-  driver: any;
+  driver: new () => FtpDriver;
+}
+
+interface FtpDriver {
+  once(event: 'ready' | 'error', listener: (err?: Error) => void): this;
+  connect(options: Record<string, string>): this;
+  end(): void;
+  get(path: string, callback: (err: Error | null, stream: NodeJS.ReadableStream) => void): void;
+  put(input: string | Buffer | Stream, path: string, callback: (err: Error | null, result: string) => void): void;
+  delete(path: string, callback: (err: Error | null, result: string) => void): void;
+  list(path: string, callback: (err: Error | null, list: FtpFile[]) => void): void;
+  rename(oldPath: string, newPath: string, callback: (err: Error | null, result: string) => void): void;
 }
 
 type GetFile = (path: string) => Promise<Buffer>;
@@ -32,25 +43,25 @@ export interface FtpClientInterface {
 }
 
 export class FtpClient implements FtpClientInterface {
-  private readonly driver: any;
-  private readonly options: any;
+  private readonly driver: new () => FtpDriver;
+  private readonly options: Record<string, string>;
 
   private readonly state = { running: false, connected: false, destroyed: false, connecting: false };
-  private client: any;
+  private client: FtpDriver | null = null;
   private _len = 0;
 
-  id = random();
+  readonly id: string = random();
 
   constructor({ driver, ...options }: FtpConnectOptions) {
     this.driver = driver;
     this.options = options;
   }
 
-  get len() {
+  get len(): number {
     return this._len;
   }
 
-  set len(n) {
+  set len(n: number) {
     this._len = n;
     if (this._len < 1) {
       this.close();
@@ -62,7 +73,7 @@ export class FtpClient implements FtpClientInterface {
   list = this.bind('list');
   rename = this.bind('rename');
 
-  private async connect(): Promise<any> {
+  private async connect(): Promise<string> {
     if (!this.client) {
       this.client = new this.driver();
     }
@@ -73,28 +84,28 @@ export class FtpClient implements FtpClientInterface {
     }
     this.state.connecting = true;
     return new Promise((resolve, reject) => {
-      this.client.once('ready', () => {
+      this.client!.once('ready', () => {
         this.state.connected = true;
         resolve('connected');
         this.state.connecting = false;
       });
-      this.client.once('error', (err) => {
+      this.client!.once('error', (err) => {
         reject(err);
         this.close();
       });
-      this.client.connect({ ...this.options });
+      this.client!.connect(this.options);
     });
   }
 
-  private close() {
-    this.client.end();
+  private close(): void {
+    this.client?.end();
     this.state.connected = false;
     this.state.destroyed = true;
     this.state.connecting = false;
     this.client = null;
   }
 
-  private async run({ fn, args }: { fn: string; args: any[] }): Promise<any> {
+  private async run<T>({ fn, args }: { fn: string; args: unknown[] }): Promise<T> {
     this.len += 1;
     if (!this.state.connected) {
       await this.connect();
@@ -105,7 +116,7 @@ export class FtpClient implements FtpClientInterface {
     this.state.running = true;
 
     return new Promise((resolve, reject) => {
-      this.client[fn](...args, (err, res) => {
+      (this.client as FtpDriver)[fn](...args, (err: Error | null, res: T) => {
         if (err) {
           reject(err);
         } else {
@@ -115,21 +126,21 @@ export class FtpClient implements FtpClientInterface {
     });
   }
 
-  private bind(fn: string) {
-    return async (...args): Promise<any> => {
+  private bind<K extends keyof FtpClientInterface>(fn: K): FtpClientInterface[K] {
+    return async (...args: Parameters<FtpClientInterface[K]>): Promise<ReturnType<FtpClientInterface[K]>> => {
       const res = await this.run({ fn, args });
       this.state.running = false;
       this.len -= 1;
-      return res;
+      return res as ReturnType<FtpClientInterface[K]>;
     };
   }
 
-  async get(...args): Promise<Buffer> {
+  async get(path: string): Promise<Buffer> {
     let res = Buffer.alloc(0);
-    const stream = await this.run({ fn: 'get', args });
+    const stream = await this.run<NodeJS.ReadableStream>({ fn: 'get', args: [path] });
 
-    return new Promise((resolve) => {
-      stream.on('data', (chunk) => {
+    return new Promise((resolve, reject) => {
+      stream.on('data', (chunk: Buffer) => {
         res = Buffer.concat([res, chunk], res.byteLength + chunk.byteLength);
       });
       stream.on('end', () => {
@@ -137,6 +148,7 @@ export class FtpClient implements FtpClientInterface {
         this.state.running = false;
         this.len -= 1;
       });
+      stream.on('error', reject);
     });
   }
 }
@@ -157,11 +169,11 @@ export class FtpClientPool implements FtpClientInterface {
   list = this.bind('list');
   rename = this.bind('rename');
 
-  get len() {
+  get len(): number {
     return this.pool.length;
   }
 
-  private get client() {
+  private get client(): FtpClient {
     if (this.pool.length < this.maxConnection) {
       const client = new FtpClient(this.options);
       this.pool.push(client);
@@ -172,8 +184,8 @@ export class FtpClientPool implements FtpClientInterface {
     return this.pool[0];
   }
 
-  private bind(fn) {
-    return async (...args) => {
+  private bind<K extends keyof FtpClientInterface>(fn: K): FtpClientInterface[K] {
+    return async (...args: Parameters<FtpClientInterface[K]>): Promise<ReturnType<FtpClientInterface[K]>> => {
       const client = this.client;
       const res = await client[fn](...args);
       if (client.len < 1) {
