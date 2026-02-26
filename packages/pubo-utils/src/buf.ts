@@ -7,11 +7,13 @@ export class BufferSplit {
   }
 
   push(buf: Buffer): Buffer[] {
+    //@ts-ignore
     const tmp = Buffer.concat([this.cache, buf]);
     const arr: Buffer[] = [];
     let n = 0;
 
     for (let i = this.cache.byteLength; i <= tmp.byteLength - this.delimiter.byteLength; i += 1) {
+      //@ts-ignore
       const isMatch = this.delimiter.equals(tmp.subarray(i, this.delimiter.byteLength + i));
       if (isMatch) {
         arr.push(tmp.subarray(n, i));
