@@ -73,7 +73,7 @@ class Manager implements StorageInstance {
   }
 
   // 同步文件备份
-  private syncFile() {
+  private async syncFile() {
     writeFileSync(this.path, JSON.stringify(this._state));
   }
 
