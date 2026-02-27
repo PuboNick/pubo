@@ -6,7 +6,6 @@ const del = require('del');
 gulp.task('clean', async function () {
   await del('lib/**');
   await del('es/**');
-  await del('dist/**');
 });
 
 const swcConfig = {

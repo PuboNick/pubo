@@ -127,11 +127,11 @@ export class FtpClient implements FtpClientInterface {
   }
 
   private bind<K extends keyof FtpClientInterface>(fn: K): FtpClientInterface[K] {
-    return async (...args: Parameters<FtpClientInterface[K]>): Promise<ReturnType<FtpClientInterface[K]>> => {
-      const res = await this.run({ fn, args });
+    return async (...args: any[]) => {
+      const res: any = await this.run({ fn, args });
       this.state.running = false;
       this.len -= 1;
-      return res as ReturnType<FtpClientInterface[K]>;
+      return res;
     };
   }
 
@@ -141,6 +141,7 @@ export class FtpClient implements FtpClientInterface {
 
     return new Promise((resolve, reject) => {
       stream.on('data', (chunk: Buffer) => {
+        // @ts-ignore
         res = Buffer.concat([res, chunk], res.byteLength + chunk.byteLength);
       });
       stream.on('end', () => {
@@ -185,9 +186,9 @@ export class FtpClientPool implements FtpClientInterface {
   }
 
   private bind<K extends keyof FtpClientInterface>(fn: K): FtpClientInterface[K] {
-    return async (...args: Parameters<FtpClientInterface[K]>): Promise<ReturnType<FtpClientInterface[K]>> => {
-      const client = this.client;
-      const res = await client[fn](...args);
+    return async (...args: any[]) => {
+      const client: any = this.client;
+      const res: any = await client[fn](...args);
       if (client.len < 1) {
         const index = this.pool.findIndex((item) => item.id === client.id);
         this.pool.splice(index, 1);

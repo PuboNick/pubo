@@ -33,9 +33,5 @@ export { cloneDeep, getTreeItem, searchTree, flatTree, filterTree, reflection } 
 export * as UTM from './math/utm';
 export { BufferSplit } from './buf';
 export * as FP from './fp';
-export {
-  ResourceHandlerParams,
-  ResourceHandlerState,
-  ResourceHandler,
-  ResourceManager,
-} from './factory/resource-manager';
+export { ResourceHandler, ResourceManager } from './factory/resource-manager';
+export type { ResourceHandlerParams, ResourceHandlerState } from './factory/resource-manager';

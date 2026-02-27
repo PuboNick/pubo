@@ -4,13 +4,11 @@
   "main": "./lib/index.js",
   "module": "./es/index.js",
   "types": "./lib/index.d.ts",
-  "unpkg": "dist/index.js",
   "sideEffects": false,
   "scripts": {
-    "build": "gulp && webpack-cli"
+    "build": "gulp"
   },
   "files": [
-    "dist",
     "lib",
     "es",
     "package.json"
