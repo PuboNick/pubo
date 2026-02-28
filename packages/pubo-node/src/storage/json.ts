@@ -1,7 +1,6 @@
 import { readFileSync, writeFile, mkdirSync, writeFileSync } from 'fs';
 import { cloneDeep, SyncQueue } from 'pubo-utils';
 import { v4 as uuid } from 'uuid';
-import type { Cluster } from 'cluster';
 
 interface StorageInstance {
   getState: () => Promise<Record<string, unknown>>;
